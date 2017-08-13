@@ -1,11 +1,17 @@
 {
-  "repositories": {
-    "packagist": {
-      "type": "composer",
-      "url": "https://packagist.phpcomposer.com"
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packagist.phpcomposer.com"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/guyanyijiu/operator"
+        }
+    ],
+
+    "require": {
+        "illuminate/database": "^5.4",
+        "guyanyijiu/operator": "^1.0"
     }
-  },
-  "require": {
-    "illuminate/database": "^5.4"
-  }
 }
