@@ -11,6 +11,8 @@
  * Class Bootstrap
  */
 
+use Illuminate\Database\Capsule\Manager as Capsule;
+
 class Bootstrap extends Yaf_Bootstrap_Abstract{
 
     /**
@@ -67,9 +69,9 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
      *
      * @param \Yaf_Dispatcher $dispacher
      */
-    public function _initPlugin(Yaf_Dispatcher $dispacher){
-        $dispacher->registerPlugin(new TestPlugin());
-    }
+     public function _initPlugin(Yaf_Dispatcher $dispacher){
+         $dispacher->registerPlugin(new TestPlugin());
+     }
 
     /**
      * 加载配置文件中自定义路由
@@ -78,15 +80,34 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
      *
      * @param \Yaf_Dispatcher $dispacher
      */
-    public function _initRoute(Yaf_Dispatcher $dispacher){
-        $routes = config('route');
-        if($routes){
-            $router = $dispacher->getRouter();
-            foreach($routes as $name => $route){
-                $router->addRoute($name, $route);
-            }
-        }
-    }
+     public function _initRoute(Yaf_Dispatcher $dispacher){
+         $routes = config('route');
+         if($routes){
+             $router = $dispacher->getRouter();
+             foreach($routes as $name => $route){
+                 $router->addRoute($name, $route);
+             }
+         }
+     }
+
+    /**
+     * 引入 Eloquent
+     *
+     * @Author   liuchao
+     */
+     public function _initDatabase(){
+         $configs = config('database');
+         if($configs){
+             $capsule = new Capsule;
+             if(! $default = config('database.default')){
+                 $default = array_shift($configs);
+             }
+             $capsule->addConnection($default);
+             $capsule->setAsGlobal();
+             $capsule->bootEloquent();
+             Yaf_Registry::set('Capsule', $capsule);
+         }
+     }
 
 
 }
