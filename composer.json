@@ -6,12 +6,16 @@
         },
         {
             "type": "vcs",
-            "url": "https://github.com/guyanyijiu/operator"
+            "url": "https://github.com/guyanyijiu/database"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/guyanyijiu/support"
         }
     ],
 
     "require": {
-        "illuminate/database": "^5.4",
-        "guyanyijiu/operator": "^1.0"
+        "pimple/pimple": "^3.2",
+        "guyanyijiu/database": "^2.1"
     }
 }

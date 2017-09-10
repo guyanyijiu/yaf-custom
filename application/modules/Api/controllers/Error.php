@@ -8,7 +8,7 @@ class ErrorController extends Yaf_Controller_Abstract{
      * 也可通过$request->getException()获取到发生的异常
      */
     public function errorAction($exception){
-        var_dump('api',$exception);exit;
+        // var_dump('api',$exception);exit;
         switch ($exception->getCode()) {
             case YAF_ERR_LOADFAILD:
                 var_dump('exception');

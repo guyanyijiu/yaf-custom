@@ -5,44 +5,40 @@
  */
 
 
-if (! function_exists('app')) {
+if (! function_exists('container')) {
     /**
-     * 获取app实例
+     * 获取容器实例
+     *
+     * @param null $name
+     *
      * @return object
      */
-    function app(){
-        return Yaf_Application::app();
+    function container($name = null){
+        if($name){
+            return (Yaf_Registry::get('container'))[$name];
+        }
+        return Yaf_Registry::get('container');
     }
 }
 
 if (! function_exists('config')) {
+
     /**
-     * 获取/设置配置项
+     * 获取 配置项
      *
-     * @param  string $key
-     * @param  mixed $default
-     * @return mixed
+     * @Author   liuchao
+     *
+     * @param null $key
+     * @param null $default
+     *
+     * @return null
      */
     function config($key = null, $default = null){
 
-        $configs = Yaf_Registry::get('configs');
-
         if (is_null($key)) {
-            return $configs;
+            return container('config')->toArray();
         }
-
-        if(strpos($key, '.')) {
-            $key = explode('.', $key);
-            return array_reduce($key, function($carry, $item) {
-                if(isset($carry[$item])){
-                    return $carry[$item];
-                }else{
-                    return null;
-                }
-            }, $configs);
-        }
-
-        return isset($configs[$key]) ? $configs[$key] : null;
+        return isset(container('config')[$key]) ? container('config')[$key] : $default;
     }
 }
 

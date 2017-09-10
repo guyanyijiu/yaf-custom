@@ -4,10 +4,15 @@
 class UserController extends \Controller\Api {
 
     public function getAction(){
-        DB::connection('lumen');
-        $info = DB::table('test')->where('id', 1)->first();
-        $info = DB::connection('lumen')->select('select * from user where name = ?', ['admin']);
-        $info = \Api\UserModel::where('id', 1)->get();
-        dump($info);
+//        var_dump(YAF_ENVIRON);exit;
+        $data = \Api\JaxApplyCompanyModel::where('company_id', '<', 20)->first();
+        var_dump($data);
+        $user = new \Api\UserModel();
+        var_dump($user->get(2));
+        $user = \Api\UserModel::where('id', 1)->first();
+        var_dump($user);
+        container('db')::transaction(function(){
+            \Api\UserModel::where('id', 1)->update(['name' => 'liuchafdfdofffhaha']);
+        });
     }
 }

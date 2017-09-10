@@ -11,9 +11,20 @@
  * Class Bootstrap
  */
 
-use Illuminate\Database\Capsule\Manager as Capsule;
-
 class Bootstrap extends Yaf_Bootstrap_Abstract{
+
+    /**
+     * 初始化一些设置
+     *
+     * @Author   liuchao
+     */
+    public function _initConfig(){
+        if(YAF_ENVIRON == 'product'){
+            error_reporting(0);
+        }else{
+            error_reporting(E_ALL);
+        }
+    }
 
     /**
      * 引入composer自动加载
@@ -21,35 +32,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
      * @Author   liuchao
      */
     public function _initComposer(){
-        Yaf_Loader::import(APP_PATH . '/vendor/autoload.php');
-    }
-
-    /**
-     * 加载配置文件
-     *
-     * @Author   liuchao
-     */
-    public function _initConfig(){
-
-        $files = scandir(APP_PATH . '/conf/');
-        foreach($files as $file){
-            if(preg_match('/^(\w+)\.(ini|php)$/', $file, $matches)){
-                $file = APP_PATH . '/conf/' . $file;
-                switch ($matches[2]) {
-                    case 'ini':
-                        if($matches[1] == 'application'){
-                            $matches[1] = 'app';
-                        }
-                        $configs[$matches[1]] = (new Yaf_Config_Ini($file, YAF_ENVIRON))->toArray();
-                        break;
-                    case 'php':
-                        // $configs[$matches[1]] = (new Yaf\Config\Simple(include $file)) -> toArray();
-                        $configs[$matches[1]] = include $file;
-                        break;
-                }
-            }
-        }
-        Yaf_Registry::set('configs', $configs);
+        Yaf_Loader::import(ROOT_PATH . '/vendor/autoload.php');
     }
 
     /**
@@ -58,8 +41,36 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
      * @Author   liuchao
      */
     public function _initHelpers(){
-        Yaf_Loader::import(APP_PATH . '/helper/functions.php');
-        Yaf_Loader::import(APP_PATH . '/helper/helpers.php');
+        Yaf_Loader::import(ROOT_PATH . '/helper/functions.php');
+        Yaf_Loader::import(ROOT_PATH . '/helper/helpers.php');
+    }
+
+    /**
+     * 加载容器，注册类库
+     *
+     * @Author   liuchao
+     */
+    public function _initContainer(){
+
+        // 实例化一个容器对象
+        $container = new Pimple\Container();
+
+        //向容器中注册config
+        $container['config'] = function (){
+            return new Config();
+        };
+
+        //向容器中注册db
+        $container['db.factory'] = function (){
+            return new \guyanyijiu\Database\Connectors\ConnectionFactory();
+        };
+        $container['db'] = function () use ($container){
+            return new \guyanyijiu\Database\DatabaseManager($container, $container['db.factory']);
+        };
+
+        \guyanyijiu\Database\Model::setConnectionResolver($container['db']);
+
+        Yaf_Registry::set('container', $container);
     }
 
     /**
@@ -70,7 +81,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
      * @param \Yaf_Dispatcher $dispacher
      */
      public function _initPlugin(Yaf_Dispatcher $dispacher){
-         $dispacher->registerPlugin(new TestPlugin());
+//         $dispacher->registerPlugin(new TestPlugin());
      }
 
     /**
@@ -89,25 +100,5 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
              }
          }
      }
-
-    /**
-     * 引入 Eloquent
-     *
-     * @Author   liuchao
-     */
-     public function _initDatabase(){
-         $configs = config('database');
-         if($configs){
-             $capsule = new Capsule;
-             if(! $default = config('database.default')){
-                 $default = array_shift($configs);
-             }
-             $capsule->addConnection($default);
-             $capsule->setAsGlobal();
-             $capsule->bootEloquent();
-             Yaf_Registry::set('Capsule', $capsule);
-         }
-     }
-
 
 }
