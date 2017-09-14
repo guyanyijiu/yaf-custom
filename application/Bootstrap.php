@@ -14,16 +14,36 @@
 class Bootstrap extends Yaf_Bootstrap_Abstract{
 
     /**
-     * 初始化一些设置
+     * 初始化设置
      *
      * @Author   liuchao
+     *
+     * @param \Yaf_Dispatcher $dispatcher
      */
-    public function _initConfig(){
+    public function _initConfig(Yaf_Dispatcher $dispatcher){
         if(YAF_ENVIRON == 'product'){
             error_reporting(0);
         }else{
             error_reporting(E_ALL);
         }
+    }
+
+    /**
+     *  生成唯一请求ID
+     *
+     * @Author   liuchao
+     *
+     * @param \Yaf_Dispatcher $dispatcher
+     */
+    public function _initRequestId(Yaf_Dispatcher $dispatcher){
+        // 先获取传递的requestId
+        $requestId = $dispatcher->getRequest()->getServer('REQUEST_ID');
+        if(! $requestId){
+            $serverIp = $dispatcher->getRequest()->getServer('SERVER_ADDR');
+            $requestId = str_replace('.', '', sprintf('%.6F', YAF_START)) . ip2long($serverIp) . mt_rand(1000, 9999);
+        }
+
+        Yaf_Registry::set('_requestId', $requestId);
     }
 
     /**
@@ -61,14 +81,10 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
         };
 
         //向容器中注册db
-        $container['db.factory'] = function (){
-            return new \guyanyijiu\Database\Connectors\ConnectionFactory();
-        };
-        $container['db'] = function () use ($container){
-            return new \guyanyijiu\Database\DatabaseManager($container, $container['db.factory']);
-        };
+        $container->register(new \guyanyijiu\Database\DatabaseServiceProvider());
 
-        \guyanyijiu\Database\Model::setConnectionResolver($container['db']);
+        //注册Redis
+        $container->register(new \guyanyijiu\Redis\RedisServiceProvider());
 
         Yaf_Registry::set('container', $container);
     }

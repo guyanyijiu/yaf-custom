@@ -38,7 +38,7 @@ if (! function_exists('config')) {
         if (is_null($key)) {
             return container('config')->toArray();
         }
-        return isset(container('config')[$key]) ? container('config')[$key] : $default;
+        return container('config')->get($key, $default);
     }
 }
 
