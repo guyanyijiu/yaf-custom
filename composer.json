@@ -11,11 +11,21 @@
         {
             "type": "vcs",
             "url": "https://github.com/guyanyijiu/support"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/guyanyijiu/redis"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/guyanyijiu/log"
         }
     ],
 
     "require": {
         "pimple/pimple": "^3.2",
-        "guyanyijiu/database": "^2.1"
+        "guyanyijiu/database": "^2.1",
+        "guyanyijiu/redis": "^1.0",
+        "guyanyijiu/log": "^1.0"
     }
 }

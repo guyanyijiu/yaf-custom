@@ -1,5 +1,4 @@
 <?php
-require ROOT_PATH . '/vendor/guyanyijiu/Log/src/AggregateFileHandler.php';
 
 use Monolog\Logger;
 use Monolog\Handler\BufferHandler;
