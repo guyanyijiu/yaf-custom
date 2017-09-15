@@ -234,12 +234,12 @@ class Requester {
      *
      * @Author   liuchao
      *
-     * @param      $requests 形如 ['user' => Requester::getAsync('http://domain.com/user')] 的关联数组
-     * @param null $callback 回调，会回传响应数组，形如 ['user' => Response]
+     * @param array    $requests 形如 ['user' => Requester::getAsync('http://domain.com/user')] 的关联数组
+     * @param \Closure $callback 回调，会回传响应数组，形如 ['user' => Response]
      *
      * @return bool
      */
-    protected function concurrence($requests, $callback = null){
+    protected function concurrence(array $requests, $callback = null){
         $promises = $requests;
         $results = settle($promises)->wait();
         if(! is_callable($callback)){
@@ -251,18 +251,35 @@ class Requester {
     /**
      * 发起一组不定数量的异步并发的请求
      *
+     * Requester::pool('POST', 'http://yaf.app/api/user/hello',
+     *     //提供不同的参数
+     *     function(){
+     *         for($i = 0; $i < 10; $i++){
+     *             yield ['id' => $i];
+     *         }
+     *     },
+     *     //成功回调
+     *     function ($response, $index){
+     *         var_dump($response->getBody()->getContents());
+     *     },
+     *     //失败回调
+     *     function ($reason, $index){
+     *         var_dump($reason);
+     *     }
+     * );
+     *
      * @Author   liuchao
      *
-     * @param     $method
-     * @param     $url
-     * @param     $parameterCallback
-     * @param     $successCallback
-     * @param     $failCallback
-     * @param int $concurrency
+     * @param              $method               请求方法
+     * @param              $url                  URL
+     * @param \Closure     $parameterCallback    参数闭包，返回迭代器对象
+     * @param \Closure     $successCallback      成功回调
+     * @param \Closure     $failCallback         失败回调
+     * @param int          $concurrency          一次请求并发量
      *
      * @return bool
      */
-    protected function pool($method, $url, $parameterCallback, $successCallback, $failCallback, $concurrency = 5){
+    protected function pool($method, $url, Closure $parameterCallback, Closure $successCallback, Closure $failCallback, $concurrency = 5){
         $method = strtoupper($method);
 
         if($method == 'GET'){
