@@ -11,6 +11,7 @@
  * Class Bootstrap
  */
 
+
 class Bootstrap extends Yaf_Bootstrap_Abstract{
 
     /**
@@ -86,19 +87,13 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
         //注册Redis
         $container->register(new \guyanyijiu\Redis\RedisServiceProvider());
 
+        // 注册 encrypt
+        $container['encrypt'] = function (){
+            return new \Illuminate\Encryption\Encrypter('abcsdfsdfsdfsdfs');
+        };
+
         Yaf_Registry::set('container', $container);
     }
-
-    /**
-     * 加载插件
-     *
-     * @Author   liuchao
-     *
-     * @param \Yaf_Dispatcher $dispacher
-     */
-     public function _initPlugin(Yaf_Dispatcher $dispacher){
-//         $dispacher->registerPlugin(new TestPlugin());
-     }
 
     /**
      * 加载配置文件中自定义路由
@@ -116,5 +111,17 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
              }
          }
      }
+
+    /**
+     * 加载插件
+     *
+     * @Author   liuchao
+     *
+     * @param \Yaf_Dispatcher $dispacher
+     */
+    public function _initPlugin(Yaf_Dispatcher $dispacher){
+         $dispacher->registerPlugin(new TestPlugin());
+         $dispacher->registerPlugin(new RequestPlugin());
+    }
 
 }
