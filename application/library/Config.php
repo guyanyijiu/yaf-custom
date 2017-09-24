@@ -1,10 +1,27 @@
 <?php
 
+/**
+ * 获取配置项，获取时加载配置文件
+ *
+ * @Author   liuchao
+ *
+ * Class Config
+ */
 
-class Config implements ArrayAccess
-{
+class Config implements ArrayAccess {
+
+    /**
+     * 配置文件所在目录
+     *
+     * @var null|string
+     */
     protected $configPath;
 
+    /**
+     * 所有已加载的配置项
+     *
+     * @var array
+     */
     protected $attributes = [];
 
     /**
@@ -16,7 +33,16 @@ class Config implements ArrayAccess
         $this->configPath = $configPath ? $configPath : ROOT_PATH . '/conf';
     }
 
-
+    /**
+     * 获取指定的配置项，如果不存在则返回$default
+     *
+     * @Author   liuchao
+     *
+     * @param      $key
+     * @param null $default
+     *
+     * @return bool|mixed|null
+     */
     public function get($key, $default = null){
         if (array_key_exists($key, $this->attributes)) {
             return $this->attributes[$key];
@@ -27,8 +53,16 @@ class Config implements ArrayAccess
         return value($default);
     }
 
-    public function getConfiguration($name = null)
-    {
+    /**
+     * 加载配置项
+     *
+     * @Author   liuchao
+     *
+     * @param null $name
+     *
+     * @return bool|mixed|null
+     */
+    private function getConfiguration($name = null){
         if (! $name) {
             return false;
         }
@@ -67,7 +101,7 @@ class Config implements ArrayAccess
      *
      * @return mixed|null
      */
-    public function getFileConfiguration($fileName){
+    private function getFileConfiguration($fileName){
         if (array_key_exists($fileName, $this->attributes)) {
             return $this->attributes[$fileName];
         }
@@ -85,44 +119,26 @@ class Config implements ArrayAccess
     }
 
     /**
-     * Get the attributes from the container.
+     * 对象转为数组
      *
+     * @Author   liuchao
      * @return array
      */
-    public function getAttributes()
-    {
+    public function toArray(){
         return $this->attributes;
     }
 
     /**
-     * Convert the Fluent instance to an array.
+     * 将对象转为 json
      *
-     * @return array
-     */
-    public function toArray()
-    {
-        return $this->attributes;
-    }
-
-    /**
-     * Convert the object into something JSON serializable.
+     * @Author   liuchao
      *
-     * @return array
-     */
-    public function jsonSerialize()
-    {
-        return $this->toArray();
-    }
-
-    /**
-     * Convert the Fluent instance to JSON.
+     * @param int $options
      *
-     * @param  int  $options
      * @return string
      */
-    public function toJson($options = 0)
-    {
-        return json_encode($this->jsonSerialize(), $options);
+    public function toJson($options = 0){
+        return json_encode($this->toArray(), $options);
     }
 
     /**
@@ -171,24 +187,13 @@ class Config implements ArrayAccess
     }
 
     /**
-     * Handle dynamic calls to the container to set attributes.
+     * 获取配置项
      *
-     * @param  string  $method
-     * @param  array   $parameters
-     * @return $this
-     */
-    public function __call($method, $parameters)
-    {
-        $this->attributes[$method] = count($parameters) > 0 ? $parameters[0] : true;
-
-        return $this;
-    }
-
-    /**
-     * Dynamically retrieve the value of an attribute.
+     * @Author   liuchao
      *
-     * @param  string  $key
-     * @return mixed
+     * @param $key
+     *
+     * @return bool|mixed|null
      */
     public function __get($key)
     {
@@ -196,11 +201,12 @@ class Config implements ArrayAccess
     }
 
     /**
-     * Dynamically set the value of an attribute.
+     * 设置配置项
      *
-     * @param  string  $key
-     * @param  mixed   $value
-     * @return void
+     * @Author   liuchao
+     *
+     * @param $key
+     * @param $value
      */
     public function __set($key, $value)
     {
@@ -208,24 +214,26 @@ class Config implements ArrayAccess
     }
 
     /**
-     * Dynamically check if an attribute is set.
+     * 判断配置项
      *
-     * @param  string  $key
+     * @Author   liuchao
+     *
+     * @param $key
+     *
      * @return bool
      */
-    public function __isset($key)
-    {
+    public function __isset($key){
         return isset($this->attributes[$key]);
     }
 
     /**
-     * Dynamically unset an attribute.
+     * 删除配置项
      *
-     * @param  string  $key
-     * @return void
+     * @Author   liuchao
+     *
+     * @param $key
      */
-    public function __unset($key)
-    {
+    public function __unset($key){
         unset($this->attributes[$key]);
     }
 }
