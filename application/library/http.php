@@ -1,6 +1,5 @@
 <?php
 
-
 use GuzzleHttp\Pool;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
@@ -16,7 +15,7 @@ use GuzzleHttp\Exception\RequestException;
  *
  * Class Requester
  */
-class Requester {
+class Http {
 
     /**
      * 超时时间
@@ -251,7 +250,7 @@ class Requester {
     /**
      * 发起一组不定数量的异步并发的请求
      *
-     * Requester::pool('POST', 'http://yaf.app/api/user/hello',
+     * Http::pool('POST', 'http://yaf.app/api/user/hello',
      *     //提供不同的参数
      *     function(){
      *         for($i = 0; $i < 10; $i++){
