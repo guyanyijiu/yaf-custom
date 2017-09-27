@@ -76,21 +76,16 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
         // 实例化一个容器对象
         $container = new Pimple\Container();
 
-        //向容器中注册config
+        // 注册config
         $container['config'] = function (){
             return new Config();
         };
 
-        //向容器中注册db
+        // 注册db
         $container->register(new \guyanyijiu\Database\DatabaseServiceProvider());
 
-        //注册Redis
+        // 注册Redis
         $container->register(new \guyanyijiu\Redis\RedisServiceProvider());
-
-        // 注册 encrypt
-        $container['encrypt'] = function (){
-            return new \Illuminate\Encryption\Encrypter('abcsdfsdfsdfsdfs');
-        };
 
         Yaf_Registry::set('container', $container);
     }
