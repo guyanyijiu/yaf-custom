@@ -1,0 +1,7 @@
+.idea/
+application/models/
+application/modules/
+application/services/
+conf/
+scripts/
+storage/
