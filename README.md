@@ -1,42 +1,45 @@
-Yaf-custom
-===============
+YAF
+=========
 
-Yaf 是一款高性能的PHP框架，本身非常简洁，开发过程中常常需要自己增加一些扩展类库，使其更易用。根据目前业务需求扩展如下：
+对 yaf 框架做了一些修改，使其更易用
 
- + 使用 [composer](https://getcomposer.org/) 管理类库和自动加载
- + 使用 [Dependency Injection Container](https://github.com/silexphp/Pimple) 管理类库依赖
- + 使用多配置文件, 支持 ini 和 php两种类型, 使用时自动加载
- + 使用基于 [monolog](https://github.com/Seldaek/monolog) 的日志类, 每次请求自动生成唯一ID, 方便跨项目请求日志跟踪
- + 使用基于 laravel 的 [Eloquent](https://d.laravel-china.org/docs/5.5/database) 修改而来的数据库操作类
- + Redis 操作类
- + 其它一些实用的类库
++ 引入 [composer](https://getcomposer.org/) 管理依赖库和自动加载
++ 引入 [illuminate/container](https://github.com/illuminate/container) Ioc 容器，实现控制反转，依赖注入
++ 引入 [illuminate/database](https://github.com/illuminate/database) 查询构造器，方便数据库操作
++ 修改 配置文件加载机制，实现配置分文件，延迟加载
++ 修改 Action 加载机制，在 controller 中接管 yaf 对 action 的加载，之后完全由 container 去加载
++ 修改 框架结构，增加 Services 层，同时使用composer自动加载，可以任意增加自定义模块目录
 
-
-> 运行环境要求PHP7.0以上。
-
+> require php >= 7.0
 
 ## 目录结构
 
-初始的目录结构如下：
-
 ~~~
-yaf-custom  WEB部署目录（或者子目录）
+yaf
 ├─application           应用目录
 │  ├─controllers        默认的控制器目录
+│  ├─jobs               消息任务相关目录
 │  ├─library        	 默认的扩展类库目录
 │  │  ├─Model.php       Model 基类文件
 │  │  ├─Controller.php  controller 基类文件
 │  │  ├─Action.php      action 基类文件
+│  │  ├─Service.php     services 基类文件
 │  │  ├─Config.php      配置文件加载类
 │  │  ├─DB.php          DB 快速操作类
 │  │  ├─Http.php        curl 请求类
 │  │  ├─Log.php         日志类
+│  │  ├─Validate.php    数据校验类
 │  │  ├─Request.php     请求类
 │  │  └─Response.php    响应类
 │  │
 │  ├─models            model目录
 │  ├─modules           模块目录
+│  │  └─Api            业务模块目录
+│  │    ├─actions      action 目录
+│  │    └─controllers  controller 目录
 │  ├─plugins           插件目录
+│  ├─services          services 目录
+│  │
 │  └─Bootstrap.php     启动引导文件
 |
 ├─conf                 配置文件目录
@@ -51,7 +54,7 @@ yaf-custom  WEB部署目录（或者子目录）
 |
 ├─public
 │  ├─index.php          入口文件
-│  └─.htaccess          用于apache的重写
+│  └─.htaccess          apache使用
 |
 ├─script                脚本文件目录
 |
@@ -59,69 +62,28 @@ yaf-custom  WEB部署目录（或者子目录）
 |               
 ├─.gitignore            git 忽略文件
 ├─cli.php               命令行入口文件
-├─composer.json         composer 定义文件
+├─composer.json         composer 文件
+├─composer.lock         composer 文件
 ├─LICENSE               LICENSE
 ├─README.md             README
 ~~~
 
-> 整体目录结构遵循 [YAF](http://www.laruence.com/manual/index.html) 默认目录结构
+## 建议
 
++ 控制器层负责接收输入，调用 Service 层执行业务逻辑，响应输出
++ Service 层负责具体业务逻辑，从 Model 层获取数据
++ Model 层直接操作数据库，可以进行一些数据校验、字段限制、格式或类型转换之类数据的操作
++ 类和方法的功能要“专注”，不要使类的依赖关系变复杂
++ 变量尽量先初始化再使用，对数组操作要注意键不存在的情况，
++ 对于可能抛出异常的代码，要有防范
++ 代码要有注释，除非一眼就能看出来代码表达的意思
 
-## 使用简介
-
-### 关键点
-- index.php 入口文件，定义 启动时间常量 YAF_START、根目录常量 ROOT_PATH ，启动框架
-- Bootstrap.php 框架引导文件，这里依次 初始化基础设置、生成唯一请求ID、引入composer、加载helper函数、加载容器、加载路由配置、加载 plugin
-- 在加载容器的时候注册要用到的类库
-- 在 plugin 做一些预处理，比如参数加解密校验，访问限制，权限验证等
-
-
-### 容器
-
-- 在 Bootstrap.php 中实例化容器
-
-```php
-	// 使用的是Pimple容器类，也是遵循标准的容器实现
-	use Pimple\Container;
-	use guyanyijiu\Database\DatabaseServiceProvider;
-	
-	// 实例化一个容器对象
-	$container = new Container();
-	
-	//向容器中注册一个类，容器实现了ArrayAccess接口，可以用数组的语法操作，闭包内返回一个对象
-	$container['config'] = function (){
-	    return new Config();
-	};
-	
-	//后续便可以这样用
-	$configObject = $container['config']; // 容器内部执行闭包并返回 Config 对象
-	
-	// 还可以定义一个 “服务提供者” 类，在里面定义要注册到容器的 “服务”
-	$container->register(new DatabaseServiceProvider());
-
-```
-- 在框架启动之后，任何地方都可以使用容器来获取对象，为了方便，提供助手函数如下
-
-```php
-
-	$configObject = container('config');
-	
-	$users = container('db')->table('user')->where('id', '<', 3)->get();
-	
-```
-
-### 数据库操作
-
-- 数据库操作类是基于 Laravel 的 Eloquent 修改而来，拥有它的查询构造器的所有功能，去掉了 ORM 模型功能，即 Model 基类也只是提供查询构造器的功能和自动维护修改时间和创建时间字段，并不会映射到数据表
-
-```php
-	//查询构造器, 具体参考 laravel 5.5 文档
-	//可以通过容器获取 db 实例
-	$db = container('db');
-	$db->table()->where()->get();
-	
-	//也可以使用DB类
-	DB::table()->where()->get(); // DB 类只是简单的代理，仍然是去调用 container('db') 的方法
-
-```
-
+## 代码规范
+## 示例
+## 参考文档
++ [数据库](https://d.laravel-china.org/docs/5.5/queries)
++ [查询结果集合类](https://d.laravel-china.org/docs/5.5/eloquent-collections)
++ [数据验证](https://www.kancloud.cn/manual/thinkphp5/129319)
++ [HTTP请求](http://guzzle-cn.readthedocs.io/zh_CN/latest/quickstart.html)
++ [时间处理库Carbon](http://blog.csdn.net/for_happy123/article/details/52921089)
++ 辅助函数 `yaf/vendor/illuminate/support/helpers.php`

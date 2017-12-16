@@ -1,33 +1,17 @@
 {
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://packagist.phpcomposer.com"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/guyanyijiu/database"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/guyanyijiu/support"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/guyanyijiu/redis"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/guyanyijiu/log"
-        }
-    ],
-
     "require": {
-        "pimple/pimple": "^3.2",
-        "guyanyijiu/database": "^3.0",
-        "guyanyijiu/log": "^1.0",
         "guzzlehttp/guzzle": "^6.3",
-        "guyanyijiu/redis": "^1.0",
-        "monolog/monolog": "^1.23"
+        "illuminate/container": "^5.5",
+        "illuminate/database": "^5.5",
+        "monolog/monolog": "^1.23",
+        "pda/pheanstalk": "^3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jobs\\": "application/jobs",
+            "": "application/library",
+            "Services\\": "application/services",
+            "Models\\": "application/models"
+        }
     }
 }

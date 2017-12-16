@@ -70,6 +70,9 @@ class Config implements ArrayAccess {
         if(strpos($name, '.')) {
             $names = explode('.', $name);
             $fileName = array_shift($names);
+            if($fileName == 'app'){
+                $fileName = 'application';
+            }
             $configs = $this->getFileConfiguration($fileName);
 
             if(! $configs){

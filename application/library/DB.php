@@ -1,10 +1,11 @@
 <?php
 
 /**
- * DB 操作类
+ * @mixin \Illuminate\Database\Capsule\Manager
  *
- * @Author   liuchao
  * Class DB
+ *
+ * @author  liuchao
  */
 class DB {
 
@@ -19,7 +20,7 @@ class DB {
      * @return mixed
      */
     public static function __callStatic($method, $parameters){
-        return container('db')->$method(...$parameters);
+        return Yaf_Registry::get('container')['db']->$method(...$parameters);
     }
 
 }

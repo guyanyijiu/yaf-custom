@@ -12,7 +12,7 @@
  */
 
 
-class Bootstrap extends Yaf_Bootstrap_Abstract{
+class Bootstrap extends Yaf_Bootstrap_Abstract {
 
     /**
      * 初始化设置
@@ -21,30 +21,12 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
      *
      * @param \Yaf_Dispatcher $dispatcher
      */
-    public function _initConfig(Yaf_Dispatcher $dispatcher){
-        if(YAF_ENVIRON == 'product'){
-            error_reporting(0);
-        }else{
-            error_reporting(E_ALL);
-        }
-    }
+    public function _initConfig(Yaf_Dispatcher $dispatcher) {
+        // 注册异常处理
+        HandleExceptions::register();
 
-    /**
-     *  生成唯一请求ID
-     *
-     * @Author   liuchao
-     *
-     * @param \Yaf_Dispatcher $dispatcher
-     */
-    public function _initRequestId(Yaf_Dispatcher $dispatcher){
-        // 先获取传递的requestId
-        $requestId = $dispatcher->getRequest()->getServer('REQUEST_ID');
-        if(! $requestId){
-            $serverIp = $dispatcher->getRequest()->getServer('SERVER_ADDR');
-            $requestId = str_replace('.', '', sprintf('%.6F', YAF_START)) . ip2long($serverIp) . mt_rand(1000, 9999);
-        }
-
-        Yaf_Registry::set('_requestId', $requestId);
+        // 关闭YAF自动渲染
+        $dispatcher->autoRender(false);
     }
 
     /**
@@ -52,7 +34,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
      *
      * @Author   liuchao
      */
-    public function _initComposer(){
+    public function _initComposer() {
         Yaf_Loader::import(ROOT_PATH . '/vendor/autoload.php');
     }
 
@@ -61,7 +43,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
      *
      * @Author   liuchao
      */
-    public function _initHelpers(){
+    public function _initHelpers() {
         Yaf_Loader::import(ROOT_PATH . '/helper/functions.php');
         Yaf_Loader::import(ROOT_PATH . '/helper/helpers.php');
     }
@@ -71,23 +53,45 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
      *
      * @Author   liuchao
      */
-    public function _initContainer(){
+    public function _initContainer() {
 
         // 实例化一个容器对象
-        $container = new Pimple\Container();
+        $container = new \Illuminate\Container\Container();
 
         // 注册config
-        $container['config'] = function (){
+        $container['config'] = function () {
             return new Config();
         };
 
         // 注册db
-        $container->register(new \guyanyijiu\Database\DatabaseServiceProvider());
+        $container->singleton('db', function ($container) {
+            $db = new \Illuminate\Database\Capsule\Manager($container);
+            $db->setAsGlobal();
+            $db::enableQueryLog();
+            register_shutdown_function(function ($db) {
+                Log::sql($db::getQueryLog());
+            }, $db);
 
-        // 注册Redis
-        $container->register(new \guyanyijiu\Redis\RedisServiceProvider());
+            return $db;
+        });
 
         Yaf_Registry::set('container', $container);
+    }
+
+    /**
+     *  生成唯一请求ID
+     *
+     * @Author   liuchao
+     *
+     * @param \Yaf_Dispatcher $dispatcher
+     */
+    public function _initRequestId(Yaf_Dispatcher $dispatcher) {
+        // 先获取传递的requestId
+        $requestId = Request::header('Requestid');
+        if ($requestId) {
+            Uniqid::setRequestId($requestId);
+        }
+
     }
 
     /**
@@ -97,15 +101,15 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
      *
      * @param \Yaf_Dispatcher $dispacher
      */
-     public function _initRoute(Yaf_Dispatcher $dispacher){
-         $routes = config('route');
-         if($routes){
-             $router = $dispacher->getRouter();
-             foreach($routes as $name => $route){
-                 $router->addRoute($name, $route);
-             }
-         }
-     }
+    //     public function _initRoute(Yaf_Dispatcher $dispacher){
+    //         $routes = config('route');
+    //         if($routes){
+    //             $router = $dispacher->getRouter();
+    //             foreach($routes as $name => $route){
+    //                 $router->addRoute($name, $route);
+    //             }
+    //         }
+    //     }
 
     /**
      * 加载插件
@@ -114,9 +118,9 @@ class Bootstrap extends Yaf_Bootstrap_Abstract{
      *
      * @param \Yaf_Dispatcher $dispacher
      */
-    public function _initPlugin(Yaf_Dispatcher $dispacher){
-         $dispacher->registerPlugin(new TestPlugin());
-         $dispacher->registerPlugin(new RequestPlugin());
-    }
+    //    public function _initPlugin(Yaf_Dispatcher $dispacher){
+    //         $dispacher->registerPlugin(new TestPlugin());
+    //         $dispacher->registerPlugin(new RequestPlugin());
+    //    }
 
 }

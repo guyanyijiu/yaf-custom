@@ -112,7 +112,7 @@ class Response {
      * @param array  $data      数据
      * @param string $message   提示信息
      */
-    public static function success($data = [], $message = ''){
+    public static function success($data = null, $message = 'success'){
         self::json(self::SUCCESS, $data, $message);
     }
 
@@ -124,7 +124,7 @@ class Response {
      * @param array  $data      数据
      * @param string $message   提示信息
      */
-    public static function fail($data = [], $message = ''){
+    public static function fail($message = 'fail', $data = null){
         self::json(self::FAIL, $data, $message);
     }
 
@@ -137,7 +137,7 @@ class Response {
      * @param array  $data      数据
      * @param string $message   提示信息
      */
-    public static function json($errno, $data = [], $message = ''){
+    public static function json($errno, $data = null, $message = ''){
         $ret = [
             'errno' => $errno,
             'errmsg' => $message,
@@ -168,6 +168,20 @@ class Response {
         ];
         header('Content-Type: application/json; charset=utf-8');
         echo $callback . '(' . json_encode($ret, JSON_UNESCAPED_UNICODE) . ')';
+        exit;
+    }
+
+    /**
+     * 原生响应
+     *
+     * @param        $data
+     * @param string $type
+     *
+     * @author  liuchao
+     */
+    public static function raw($data, $type = 'json'){
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
         exit;
     }
 

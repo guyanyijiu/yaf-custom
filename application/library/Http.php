@@ -18,145 +18,74 @@ use GuzzleHttp\Exception\RequestException;
 class Http {
 
     /**
-     * 超时时间
-     *
-     * @var
-     */
-    protected $timeout;
-
-    /**
-     * base uri
-     *
-     * @var
-     */
-    protected $baseUri;
-
-    /**
-     * headers
-     *
-     * @var
-     */
-    protected $headers;
-
-    /**
-     * 缓存一个裸的 guzzle 实例
+     * 缓存一个 guzzle 实例
      *
      * @var
      */
     protected static $client;
 
     /**
+     * 请求的body类型
+     *
+     * @var array
+     */
+    protected static $allowBodyType = [
+        'form'      => 'form_params',
+        'multipart' => 'multipart',
+        'string'    => 'body',
+        'stream'    => 'body',
+        'json'      => 'json',
+    ];
+
+    /**
      * 获取一个 guzzle 实例
      *
-     * @Author   liuchao
-     * @return \GuzzleHttp\Client
+     * @param array $args
+     *
+     * @return Client
+     *
+     * @author  liuchao
      */
-    protected function guzzle(){
-        $args = [];
+    public static function guzzle($args = []) {
 
-        if(!is_null($this->baseUri)){
-            $args['base_uri'] = $this->baseUri;
+        if ( !is_null(static::$client)) {
+            return static::$client;
         }
+        $args['headers']['Requestid'] = \Uniqid::getRequestId();
 
-        if(!is_null($this->headers)){
-            $args['headers'] = $this->headers;
-        }
+        return static::$client = new Client($args);
 
-        if(!is_null($this->timeout)){
-            $args['timeout'] = $this->timeout;
-        }
-
-        if(! $args){
-            if(!is_null(static::$client)){
-                return static::$client;
-            }
-            $args['headers']['REQUEST_ID'] = \Yaf_Registry::get('_requestId');
-            return static::$client = new Client($args);
-        }
-
-        $this->clear();
-        return new Client($args);
-    }
-
-    /**
-     * 链式操作结束，清空设置
-     *
-     * @Author   liuchao
-     */
-    protected function clear(){
-        $this->headers = null;
-        $this->baseUri = null;
-        $this->timeout = null;
-    }
-
-    /**
-     * 设置 base URI
-     *
-     * @Author   liuchao
-     *
-     * @param $uri
-     *
-     * @return $this
-     */
-    protected function baseUri($uri){
-        $this->baseUri = $uri;
-        return $this;
-    }
-
-    /**
-     * 设置 timeout
-     *
-     * @Author   liuchao
-     *
-     * @param int $second
-     *
-     * @return $this
-     */
-    protected function timeout($second = 30){
-        $this->timeout = $second;
-        return $this;
-    }
-
-    /**
-     * 设置 header
-     *
-     * @Author   liuchao
-     *
-     * @param array $headers
-     *
-     * @return $this
-     */
-    protected function headers(array $headers){
-        $this->headers = $headers;
-        return $this;
     }
 
     /**
      * 发起一个 GET 请求
      *
-     * @Author   liuchao
-     *
      * @param       $url
-     * @param array $query 参数，关联数组形式
+     * @param array $query
+     * @param array $args
      *
-     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @return mixed|ResponseInterface
+     *
+     * @author  liuchao
      */
-    protected function get($url, $query = []){
-        return $this->guzzle()->request('GET', $url, ['query' => $query]);
+    public static function get($url, $query = [], $args = []) {
+        return static::guzzle($args)->request('GET', $url, ['query' => $query]);
     }
 
     /**
      * 发起一个 POST 请求
      *
-     * @Author   liuchao
+     * @param        $url
+     * @param array  $query
+     * @param string $body
+     * @param array  $args
      *
-     * @param       $url
-     * @param array $query 参数，关联数组形式
+     * @return mixed|ResponseInterface
      *
-     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @author  liuchao
      */
-    protected function post($url, $query = []){
-        return $this->guzzle()->request('POST', $url, ['form_params' => $query]);
+    public static function post($url, $query = [], $body = 'form', $args = []) {
+        return static::guzzle($args)->request('POST', $url, [self::$allowBodyType[$body] => $query]);
     }
 
     /**
@@ -170,23 +99,24 @@ class Http {
      *
      * @return bool
      */
-    protected function getAsync($url, $query = [], $callback = null){
-        return $this->requestAsync('GET', $url, ['query' => $query], $callback);
+    public static function getAsync($url, $query = [], $callback = null) {
+        return static::requestAsync('GET', $url, ['query' => $query], $callback);
     }
 
     /**
-     * 发起一个 POST 请求
+     * 发起一个异步的 POST 请求
      *
-     * @Author   liuchao
-     *
-     * @param       $url
-     * @param array $query
-     * @param null  $callback
+     * @param        $url
+     * @param array  $query
+     * @param null   $callback
+     * @param string $body
      *
      * @return bool
+     *
+     * @author  liuchao
      */
-    protected function postAsync($url, $query = [], $callback = null){
-        return $this->requestAsync('POST', $url, ['form_params' => $query], $callback);
+    public static function postAsync($url, $query = [], $callback = null, $body = 'form') {
+        return static::requestAsync('POST', $url, [self::$allowBodyType[$body] => $query], $callback);
     }
 
     /**
@@ -201,19 +131,19 @@ class Http {
      *
      * @return bool
      */
-    protected function requestAsync($method, $url, $query = [], $callback = null){
-        if(func_num_args() == 3){
+    public static function requestAsync($method, $url, $query = [], $callback = null) {
+        if (func_num_args() == 3) {
             $query = [];
             $callback = $query;
         }
 
-        if(!is_callable($callback)){
-            $callback = function() use ($callback){
+        if ( !is_callable($callback)) {
+            $callback = function () use ($callback) {
                 return $callback;
             };
         }
 
-        $promise = $this->guzzle()->requestAsync($method, $url, $query);
+        $promise = static::guzzle()->requestAsync($method, $url, $query);
 
         $promise->then(
             function (ResponseInterface $response) use ($callback) {
@@ -221,6 +151,7 @@ class Http {
             },
             function (RequestException $e) use ($callback) {
                 $response = (new Response())->withStatus(400, $e->getMessage());
+
                 return $callback($response);
             }
         );
@@ -238,12 +169,13 @@ class Http {
      *
      * @return bool
      */
-    protected function concurrence(array $requests, $callback = null){
+    protected function concurrence(array $requests, $callback = null) {
         $promises = $requests;
         $results = settle($promises)->wait();
-        if(! is_callable($callback)){
+        if ( !is_callable($callback)) {
             return true;
         }
+
         return $callback($results);
     }
 
@@ -278,65 +210,37 @@ class Http {
      *
      * @return bool
      */
-    protected function pool($method, $url, Closure $parameterCallback, Closure $successCallback, Closure $failCallback, $concurrency = 5){
+    protected function pool($method, $url, Closure $parameterCallback, Closure $successCallback, Closure $failCallback, $concurrency = 5) {
         $method = strtoupper($method);
 
-        if($method == 'GET'){
+        if ($method == 'GET') {
             $requests = function () use ($method, $url, $parameterCallback) {
                 $query = $parameterCallback();
-                foreach($query as $v){
+                foreach ($query as $v) {
                     yield new PsrRequest($method, $url . '?' . http_build_query($v));
                 }
             };
-        }elseif($method == 'POST'){
+        } elseif ($method == 'POST') {
             $requests = function () use ($method, $url, $parameterCallback) {
                 $query = $parameterCallback();
-                foreach($query as $v){
+                foreach ($query as $v) {
                     yield new PsrRequest($method, $url, ['content-type' => 'application/x-www-form-urlencoded'], http_build_query($v));
                 }
             };
-        }else{
+        } else {
             return false;
         }
 
         $client = $this->guzzle();
         $pool = new Pool($client, $requests(), [
             'concurrency' => $concurrency,
-            'fulfilled' => $successCallback,
-            'rejected' => $failCallback
+            'fulfilled'   => $successCallback,
+            'rejected'    => $failCallback,
         ]);
 
         $promise = $pool->promise();
 
         $promise->wait();
-    }
-
-    /**
-     * 代理普通方法调用
-     *
-     * @Author   liuchao
-     *
-     * @param $method
-     * @param $parameters
-     *
-     * @return mixed
-     */
-    public function __call($method, $parameters){
-        return call_user_func_array([$this, $method], $parameters);
-    }
-
-    /**
-     * 代理静态方法调用
-     *
-     * @Author   liuchao
-     *
-     * @param $method
-     * @param $parameters
-     *
-     * @return mixed
-     */
-    public static function __callStatic($method, $parameters){
-        return call_user_func_array([(new static), $method], $parameters);
     }
 
 }

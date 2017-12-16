@@ -36,3 +36,17 @@ if (! function_exists('dump')){
     }
 }
 
+if(! function_exists('int2float')) {
+    /**
+     * 将整数转为为保留2位小数的浮点数
+     *
+     * @param $num
+     * @return string
+     *
+     * @author  yefujian
+     */
+    function int2float($num) {
+        return sprintf("%.2f",$num);
+    }
+}
+

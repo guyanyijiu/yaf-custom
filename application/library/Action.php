@@ -3,9 +3,10 @@
 /**
  * Action 基类
  *
- * @Author   liuchao
  * Class Action
+ *
+ * @author  liuchao
  */
-abstract class Action extends \Yaf_Action_abstract {
-
+abstract class Action {
+    abstract public function execute();
 }

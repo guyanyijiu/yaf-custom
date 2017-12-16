@@ -18,7 +18,7 @@ return [
      *   'action'     => 'test',
      * )
      */
-    'simple' => new Yaf_Route_Simple("m", "c", "a"),
+//    'simple' => new Yaf_Route_Simple("m", "c", "a"),
 
     /**
      * 指定supervar变量名
@@ -31,7 +31,7 @@ return [
      *   'action'     => 'c',
      * )
      */
-    'supervar' => new Yaf_Route_Supervar("r"),
+//    'supervar' => new Yaf_Route_Supervar("r"),
 
     /**
      * 对于请求request_uri为"/ap/foo/bar"
@@ -60,14 +60,14 @@ return [
      * )
      * 如果路由是 '/user/:id/*' 则后面成对出现的都将被做成变量名/值对放入参数里
      */
-    'rewrite' => new Yaf_Route_Rewrite(
-        'user/:id',
-        [
-            'module' => 'Api',
-            'controller' => 'User',
-            'action' => 'get',
-        ]
-    ),
+//    'rewrite' => new Yaf_Route_Rewrite(
+//        'user/:id',
+//        [
+//            'module' => 'Api',
+//            'controller' => 'User',
+//            'action' => 'get',
+//        ]
+//    ),
 
     /**
      * Regex 路由
@@ -87,17 +87,17 @@ return [
      * 正则表达式必须是正规的正则语法
      *
      */
-    'regex' => new Yaf_Route_Regex(
-        "/order\/([0-9]+)/",
-        [
-            'module' => 'Api',
-            'controller' => 'Order',
-            'action' => 'get',
-        ],
-        [
-            1 => 'id'
-        ]
-    ),
+//    'regex' => new Yaf_Route_Regex(
+//        "/order\/([0-9]+)/",
+//        [
+//            'module' => 'Api',
+//            'controller' => 'Order',
+//            'action' => 'get',
+//        ],
+//        [
+//            1 => 'id'
+//        ]
+//    ),
 
 
 ];

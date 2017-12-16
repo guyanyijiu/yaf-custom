@@ -3,7 +3,8 @@
 use Monolog\Logger;
 use Monolog\Handler\BufferHandler;
 use Monolog\Formatter\LineFormatter;
-use guyanyijiu\Log\AggregateFileHandler;
+use Log\AggregateFileHandler;
+use Log\AggregateCliFileHandler;
 
 /**
  * 日志类
@@ -16,9 +17,16 @@ class Log {
     /**
      * monolog 实例
      *
-     * @var array
+     * @var Logger
      */
-    protected static $loggers = [];
+    protected static $logger;
+
+    /**
+     * sql 日志的 monolog 实例
+     *
+     * @var Logger
+     */
+    protected static $special_loggers = [];
 
     /**
      * 根据模块名生成不同的monolog实例
@@ -26,32 +34,138 @@ class Log {
      * @Author   liuchao
      * @return mixed|\Monolog\Logger
      */
-    public static function getLogger(){
-        $moduleName = Yaf_Dispatcher::getInstance()->getRequest()->getModuleName();
+    public static function getLogger() {
 
-        if(isset(static::$loggers[$moduleName])){
-            return static::$loggers[$moduleName];
+        if (is_null(static::$logger)) {
+            $moduleName = Yaf_Dispatcher::getInstance()->getRequest()->getModuleName();
+            $controllerName = Yaf_Dispatcher::getInstance()->getRequest()->getControllerName();
+
+            $logFile = config('application.log_path') . '/' . config('application.app_name') . '/' . $moduleName . '/' . $controllerName . '/' . date('Y-m-d') . '.log';
+            $fileHandler = new AggregateFileHandler($logFile, Logger::DEBUG);
+            $fileHandler->setFormatter(
+                new LineFormatter(Uniqid::getRequestId() . "|%datetime%|%channel%|%level_name%|%message%|%context%|%extra%\n", 'Y-m-d H:i:s.u')
+            );
+            $bufferHandler = new BufferHandler($fileHandler, 100, Logger::DEBUG, false, true);
+
+            $logger = new Logger($moduleName);
+            $logger->pushHandler($bufferHandler);
+
+            static::$logger = $logger;
         }
 
-        // > info 的日志
-        $fileUpInfo = new AggregateFileHandler(config('application.logPath') . config('application.appName') . '/' . $moduleName . '-' . date('Y-m-d') . '.log', Logger::INFO);
-        $fileUpInfo->setFormatter(
-            new LineFormatter(Yaf_Registry::get('_requestId') . " | %datetime% | %channel% | %level_name% | %message% | %context%\n", 'Y-m-d H:i:s.u')
-        );
-        $fileUpInfoBuffer = new BufferHandler($fileUpInfo, 0, Logger::INFO, false);
+        return static::$logger;
+    }
 
-        // > debug 的日志
-        $fileUpDebug = new AggregateFileHandler(config('application.logPath') . config('application.appName') . '/debug-' . $moduleName . '-' . date('Y-m-d') . '.log', Logger::DEBUG);
-        $fileUpDebug->setFormatter(
-            new LineFormatter(Yaf_Registry::get('_requestId') . " | %datetime% | %channel% | %level_name% | %message% | %context%\n", 'Y-m-d H:i:s.u')
-        );
-        $fileUpDebugBuffer = new BufferHandler($fileUpDebug, 0, Logger::DEBUG, false);
+    /**
+     * 命令行下的 monolog 实例
+     *
+     * @return Logger
+     *
+     * @author  liuchao
+     */
+    public static function getCliLogger() {
+        if (is_null(static::$logger)) {
+            $script = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1, -4);
+            $logFile = config('application.log_path') . '/' . config('application.app_name') . '/cli/' . $script . '/' . date('Y-m-d') . '.log';
+            $fileHandler = new AggregateCliFileHandler($logFile, Logger::DEBUG);
+            $fileHandler->setFormatter(
+                new LineFormatter(Uniqid::getRequestId() . "|%datetime%|%channel%|%level_name%|%message%|%context%|%extra%\n", 'Y-m-d H:i:s.u')
+            );
 
-        $logger = new Logger($moduleName);
-        $logger->pushHandler($fileUpDebugBuffer);
-        $logger->pushHandler($fileUpInfoBuffer);
+            $logger = new Logger($script);
+            $logger->pushHandler($fileHandler);
 
-        return static::$loggers[$moduleName] = $logger;
+            static::$logger = $logger;
+
+        }
+
+        return static::$logger;
+    }
+
+    /**
+     * 获取一个特殊类型的 monolog 实例
+     *
+     * @param      $type
+     * @param bool $is_buffer
+     *
+     * @return mixed
+     *
+     * @author  liuchao
+     */
+    public static function getSpecialLogger($type, $is_buffer = false) {
+        if ( !isset(static::$special_loggers[$type])) {
+            if (PHP_SAPI == 'cli') {
+                $moduleName = 'cli';
+                $controllerName = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1, -4);
+            } else {
+                $moduleName = Yaf_Dispatcher::getInstance()->getRequest()->getModuleName();
+                $controllerName = Yaf_Dispatcher::getInstance()->getRequest()->getControllerName();
+            }
+
+            $logFile = config('application.log_path') . '/' . config('application.app_name') . '/' . $moduleName . '/' . $controllerName . '/' . $type . '.' . date('Y-m-d') . '.log';
+
+            if ($is_buffer) {
+                $fileHandler = new \Log\AggregateHandler($logFile, Logger::DEBUG);
+                $fileHandler->setFormatter(
+                    new LineFormatter(Uniqid::getRequestId() . "|%datetime%|%channel%|$type|%message%|%context%\n", 'Y-m-d H:i:s.u')
+                );
+                $handler = new BufferHandler($fileHandler, 100, Logger::DEBUG, false, true);
+            } else {
+                $fileHandler = new \Monolog\Handler\StreamHandler($logFile, Logger::DEBUG);
+                $fileHandler->setFormatter(
+                    new LineFormatter(Uniqid::getRequestId() . "|%datetime%|%channel%|$type|%message%|%context%\n", 'Y-m-d H:i:s.u')
+                );
+                $handler = $fileHandler;
+            }
+
+            $logger = new Logger($moduleName);
+            $logger->pushHandler($handler);
+
+            static::$special_loggers[$type] = $logger;
+        }
+
+        return static::$special_loggers[$type];
+    }
+
+    /**
+     * 记录未捕获异常的日志
+     *
+     * @param       $message
+     * @param array $context
+     *
+     * @author  liuchao
+     */
+    public static function exception($message, array $context = []) {
+        if ( !$message) {
+            return;
+        }
+        $logger = static::getSpecialLogger('exception', false);
+
+        $logger->info($message, $context);
+    }
+
+    /**
+     * 记录 SQL 日志
+     *
+     * @param $logs
+     *
+     * @author  liuchao
+     */
+    public static function sql($logs) {
+        if ( !$logs) {
+            return;
+        }
+        $logger = static::getSpecialLogger('sql', true);
+
+        foreach ($logs as $v) {
+            $sql = '';
+            $sql .= $v['query'] . '|';
+            if ($v['bindings']) {
+                $sql .= implode(',', $v['bindings']);
+            }
+            $sql .= '|' . $v['time'];
+            $logger->info($sql);
+        }
     }
 
     /**
@@ -64,11 +178,10 @@ class Log {
      *
      * @return mixed
      */
-    public function __call($method, $parameters){
-        if(YAF_ENVIRON == 'product' && strtolower($method) == 'debug'){
-            return;
-        }
-        return call_user_func_array([static::getLogger(), $method], $parameters);
+    public function __call($method, $parameters) {
+        $logger = PHP_SAPI == 'cli' ? static::getCliLogger() : static::getLogger();
+
+        return call_user_func_array([$logger, $method], $parameters);
     }
 
     /**
@@ -81,11 +194,10 @@ class Log {
      *
      * @return mixed
      */
-    public static function __callStatic($method, $parameters){
-        if(YAF_ENVIRON == 'product' && strtolower($method) == 'debug'){
-            return;
-        }
-        return call_user_func_array([static::getLogger(), $method], $parameters);
+    public static function __callStatic($method, $parameters) {
+        $logger = PHP_SAPI == 'cli' ? static::getCliLogger() : static::getLogger();
+
+        return call_user_func_array([$logger, $method], $parameters);
     }
 
 }

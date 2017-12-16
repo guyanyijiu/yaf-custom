@@ -5,7 +5,7 @@
  */
 
 
-if (! function_exists('container')) {
+if ( !function_exists('container')) {
     /**
      * 获取容器实例
      *
@@ -13,15 +13,16 @@ if (! function_exists('container')) {
      *
      * @return object
      */
-    function container($name = null){
-        if($name){
+    function container($name = null) {
+        if ($name) {
             return (Yaf_Registry::get('container'))[$name];
         }
+
         return Yaf_Registry::get('container');
     }
 }
 
-if (! function_exists('config')) {
+if ( !function_exists('config')) {
 
     /**
      * 获取 配置项
@@ -33,11 +34,12 @@ if (! function_exists('config')) {
      *
      * @return null
      */
-    function config($key = null, $default = null){
+    function config($key = null, $default = null) {
 
         if (is_null($key)) {
             return container('config')->toArray();
         }
+
         return container('config')->get($key, $default);
     }
 }
