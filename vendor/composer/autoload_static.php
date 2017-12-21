@@ -19,6 +19,7 @@ class ComposerStaticInit2e2177b4cf64296a3fbba76b4a544af9
         array (
             'Symfony\\Polyfill\\Mbstring\\' => 26,
             'Symfony\\Component\\Translation\\' => 30,
+            'Sinapay\\' => 8,
             'Services\\' => 9,
         ),
         'P' => 
@@ -31,6 +32,7 @@ class ComposerStaticInit2e2177b4cf64296a3fbba76b4a544af9
         ),
         'M' => 
         array (
+            'Moxie\\' => 6,
             'Monolog\\' => 8,
             'Models\\' => 7,
         ),
@@ -70,6 +72,10 @@ class ComposerStaticInit2e2177b4cf64296a3fbba76b4a544af9
         array (
             0 => __DIR__ . '/..' . '/symfony/translation',
         ),
+        'Sinapay\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/contrib/sinapay',
+        ),
         'Services\\' => 
         array (
             0 => __DIR__ . '/../..' . '/application/services',
@@ -93,6 +99,10 @@ class ComposerStaticInit2e2177b4cf64296a3fbba76b4a544af9
         'Pheanstalk\\' => 
         array (
             0 => __DIR__ . '/..' . '/pda/pheanstalk/src',
+        ),
+        'Moxie\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/contrib/moxie',
         ),
         'Monolog\\' => 
         array (
@@ -155,6 +165,7 @@ class ComposerStaticInit2e2177b4cf64296a3fbba76b4a544af9
         'Carbon\\Exceptions\\InvalidDateException' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Exceptions/InvalidDateException.php',
         'Config' => __DIR__ . '/../..' . '/application/library/Config.php',
         'Controller' => __DIR__ . '/../..' . '/application/library/Controller.php',
+        'CryptDes' => __DIR__ . '/../..' . '/application/library/CryptDes.php',
         'DB' => __DIR__ . '/../..' . '/application/library/DB.php',
         'Doctrine\\Common\\Inflector\\Inflector' => __DIR__ . '/..' . '/doctrine/inflector/lib/Doctrine/Common/Inflector/Inflector.php',
         'Encrypter' => __DIR__ . '/../..' . '/application/library/Encrypter.php',
@@ -227,6 +238,7 @@ class ComposerStaticInit2e2177b4cf64296a3fbba76b4a544af9
         'GuzzleHttp\\RetryMiddleware' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/RetryMiddleware.php',
         'GuzzleHttp\\TransferStats' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/TransferStats.php',
         'GuzzleHttp\\UriTemplate' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/UriTemplate.php',
+        'HandleExceptions' => __DIR__ . '/../..' . '/application/library/HandleExceptions.php',
         'Http' => __DIR__ . '/../..' . '/application/library/Http.php',
         'Illuminate\\Container\\BoundMethod' => __DIR__ . '/..' . '/illuminate/container/BoundMethod.php',
         'Illuminate\\Container\\Container' => __DIR__ . '/..' . '/illuminate/container/Container.php',
@@ -500,7 +512,20 @@ class ComposerStaticInit2e2177b4cf64296a3fbba76b4a544af9
         'Log' => __DIR__ . '/../..' . '/application/library/Log.php',
         'Log\\AggregateCliFileHandler' => __DIR__ . '/../..' . '/application/library/Log/AggregateCliFileHandler.php',
         'Log\\AggregateFileHandler' => __DIR__ . '/../..' . '/application/library/Log/AggregateFileHandler.php',
+        'Log\\AggregateHandler' => __DIR__ . '/../..' . '/application/library/Log/AggregateHandler.php',
+        'Math' => __DIR__ . '/../..' . '/application/library/Math.php',
         'Model' => __DIR__ . '/../..' . '/application/library/Model.php',
+        'Models\\CubeJaxApply' => __DIR__ . '/../..' . '/application/models/CubeJaxApply.php',
+        'Models\\JaxApply' => __DIR__ . '/../..' . '/application/models/JaxApply.php',
+        'Models\\JaxOrderPay' => __DIR__ . '/../..' . '/application/models/JaxOrderPay.php',
+        'Models\\JaxOrderRepay' => __DIR__ . '/../..' . '/application/models/JaxOrderRepay.php',
+        'Models\\JaxUserInfo' => __DIR__ . '/../..' . '/application/models/JaxUserInfo.php',
+        'Models\\LoanBill' => __DIR__ . '/../..' . '/application/models/LoanBill.php',
+        'Models\\LoanProductConfig' => __DIR__ . '/../..' . '/application/models/LoanProductConfig.php',
+        'Models\\LoanRepay' => __DIR__ . '/../..' . '/application/models/LoanRepay.php',
+        'Models\\LoanTrade' => __DIR__ . '/../..' . '/application/models/LoanTrade.php',
+        'Models\\LoanUseConfig' => __DIR__ . '/../..' . '/application/models/LoanUseConfig.php',
+        'Models\\PayFlow' => __DIR__ . '/../..' . '/application/models/PayFlow.php',
         'Monolog\\ErrorHandler' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/ErrorHandler.php',
         'Monolog\\Formatter\\ChromePHPFormatter' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/Formatter/ChromePHPFormatter.php',
         'Monolog\\Formatter\\ElasticaFormatter' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/Formatter/ElasticaFormatter.php',
@@ -661,8 +686,15 @@ class ComposerStaticInit2e2177b4cf64296a3fbba76b4a544af9
         'RSA' => __DIR__ . '/../..' . '/application/library/RSA.php',
         'Request' => __DIR__ . '/../..' . '/application/library/Request.php',
         'Response' => __DIR__ . '/../..' . '/application/library/Response.php',
-        'Services' => __DIR__ . '/../..' . '/application/library/Services.php',
-        'Services\\PayDayLoan' => __DIR__ . '/../..' . '/application/services/PayDayLoan.php',
+        'Service' => __DIR__ . '/../..' . '/application/library/Service.php',
+        'Services\\Loan\\Pay' => __DIR__ . '/../..' . '/application/services/Loan/Pay.php',
+        'Services\\Loan\\PayDayLoan' => __DIR__ . '/../..' . '/application/services/Loan/PayDayLoan.php',
+        'Services\\Loan\\ProductCompute' => __DIR__ . '/../..' . '/application/services/Loan/ProductCompute.php',
+        'Services\\Loan\\ProductGenerate' => __DIR__ . '/../..' . '/application/services/Loan/ProductGenerate.php',
+        'Services\\Loan\\ProductList' => __DIR__ . '/../..' . '/application/services/Loan/ProductList.php',
+        'Services\\Loan\\StageLoan' => __DIR__ . '/../..' . '/application/services/Loan/StageLoan.php',
+        'Services\\Loan\\Trade' => __DIR__ . '/../..' . '/application/services/Loan/Trade.php',
+        'Services\\Loan\\UserInfo' => __DIR__ . '/../..' . '/application/services/Loan/UserInfo.php',
         'Symfony\\Component\\Translation\\Catalogue\\AbstractOperation' => __DIR__ . '/..' . '/symfony/translation/Catalogue/AbstractOperation.php',
         'Symfony\\Component\\Translation\\Catalogue\\MergeOperation' => __DIR__ . '/..' . '/symfony/translation/Catalogue/MergeOperation.php',
         'Symfony\\Component\\Translation\\Catalogue\\OperationInterface' => __DIR__ . '/..' . '/symfony/translation/Catalogue/OperationInterface.php',
@@ -730,6 +762,7 @@ class ComposerStaticInit2e2177b4cf64296a3fbba76b4a544af9
         'Symfony\\Component\\Translation\\Writer\\TranslationWriter' => __DIR__ . '/..' . '/symfony/translation/Writer/TranslationWriter.php',
         'Symfony\\Component\\Translation\\Writer\\TranslationWriterInterface' => __DIR__ . '/..' . '/symfony/translation/Writer/TranslationWriterInterface.php',
         'Symfony\\Polyfill\\Mbstring\\Mbstring' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/Mbstring.php',
+        'Uniqid' => __DIR__ . '/../..' . '/application/library/Uniqid.php',
         'Validate' => __DIR__ . '/../..' . '/application/library/Validate.php',
     );
 

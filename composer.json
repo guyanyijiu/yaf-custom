@@ -11,7 +11,9 @@
             "Jobs\\": "application/jobs",
             "": "application/library",
             "Services\\": "application/services",
-            "Models\\": "application/models"
+            "Models\\": "application/models",
+            "Moxie\\": "contrib/moxie",
+            "Sinapay\\": "contrib/sinapay"
         }
     }
 }
