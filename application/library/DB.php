@@ -20,7 +20,7 @@ class DB {
      * @return mixed
      */
     public static function __callStatic($method, $parameters){
-        return Yaf_Registry::get('container')['db']::$method(...$parameters);
+        return (Yaf_Registry::get('container')['db'])::$method(...$parameters);
     }
 
 }

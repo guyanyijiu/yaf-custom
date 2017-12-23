@@ -15,7 +15,7 @@ if ( !function_exists('container')) {
      */
     function container($name = null) {
         if ($name) {
-            return (Yaf_Registry::get('container'))[$name];
+            return (Yaf_Registry::get('container'))->make($name);
         }
 
         return Yaf_Registry::get('container');

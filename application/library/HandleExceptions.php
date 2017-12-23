@@ -11,17 +11,18 @@ class HandleExceptions {
      */
     public static function register() {
 
-        error_reporting(-1);
+        if (YAF_ENVIRON == 'product') {
+            error_reporting(0);
+            ini_set('display_errors', 'Off');
+        } else {
+            error_reporting(-1);
+        }
 
         set_error_handler([static::class, 'handleError']);
 
         set_exception_handler([static::class, 'handleException']);
 
         register_shutdown_function([static::class, 'handleShutdown']);
-
-        if (YAF_ENVIRON == 'product') {
-            ini_set('display_errors', 'Off');
-        }
     }
 
     /**
@@ -50,15 +51,7 @@ class HandleExceptions {
      * @author  liuchao
      */
     public static function handleException(\Throwable $e) {
-        if ($e instanceof \Yaf_Exception) {
-            $type = 'YAF 异常';
-        } elseif ($e instanceof \PDOException) {
-            $type = 'POD 异常';
-        } else {
-            $type = '未知 异常';
-        }
-
-        Log::exception($type, [
+        Log::exception('未捕获异常', [
             'code'    => $e->getCode(),
             'message' => $e->getMessage(),
             'trace'   => $e->getTraceAsString(),
@@ -72,25 +65,29 @@ class HandleExceptions {
     }
 
     /**
-     *  cli 输出
+     * cli 输出
      *
-     * @param $e
+     * @param Throwable $e
      *
      * @author  liuchao
      */
-    protected static function renderForConsole($e) {
-        throw $e;
+    protected static function renderForConsole(\Throwable $e) {
+        echo $e->getCode(), "\n", $e->getMessage(), "\n", $e->getTraceAsString(), "\n";
     }
 
     /**
      * http 输出
      *
-     * @param Exception $e
+     * @param Throwable $e
      *
      * @author  liuchao
      */
-    protected static function renderHttpResponse($e) {
-        Response::fail('程序内部错误');
+    protected static function renderHttpResponse(\Throwable $e) {
+        if (YAF_ENVIRON == 'product') {
+            Response::fail('程序内部错误');
+        }
+
+        Response::fail($e->getMessage());
     }
 
     /**

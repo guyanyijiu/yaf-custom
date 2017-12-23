@@ -23,7 +23,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
      */
     public function _initConfig(Yaf_Dispatcher $dispatcher) {
         // 注册异常处理
-        HandleExceptions::register();
+        \HandleExceptions::register();
 
         // 关闭YAF自动渲染
         $dispatcher->autoRender(false);
@@ -59,17 +59,21 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
         $container = new \Illuminate\Container\Container();
 
         // 注册config
-        $container['config'] = function () {
-            return new Config();
-        };
+        $container->singleton('config', function (){
+            return new \Config(CONF_PATH);
+        });
 
         // 注册db
         $container->singleton('db', function ($container) {
             $db = new \Illuminate\Database\Capsule\Manager($container);
+
+            $container->make('config')->get('database.default', null, false);
+
             $db->setAsGlobal();
+
             $db::enableQueryLog();
             register_shutdown_function(function ($db) {
-                Log::sql($db::getQueryLog());
+                \Log::sql($db::getQueryLog());
             }, $db);
 
             return $db;
@@ -87,9 +91,9 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
      */
     public function _initRequestId(Yaf_Dispatcher $dispatcher) {
         // 先获取传递的requestId
-        $requestId = Request::header('Requestid');
+        $requestId = \Request::header('Requestid');
         if ($requestId) {
-            Uniqid::setRequestId($requestId);
+            \Uniqid::setRequestId($requestId);
         }
 
     }
