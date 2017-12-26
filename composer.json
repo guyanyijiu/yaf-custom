@@ -3,6 +3,7 @@
         "guzzlehttp/guzzle": "^6.3",
         "illuminate/container": "^5.5",
         "illuminate/database": "^5.5",
+        "illuminate/events": "^5.5",
         "monolog/monolog": "^1.23",
         "pda/pheanstalk": "^3.1"
     },

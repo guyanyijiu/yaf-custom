@@ -95,6 +95,7 @@ class Log {
     public static function getSpecialLogger($type, $is_buffer = false) {
         if ( !isset(static::$special_loggers[$type])) {
             if (PHP_SAPI == 'cli') {
+                $is_buffer = false;
                 $moduleName = 'cli';
                 $controllerName = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1, -4);
             } else {
@@ -158,13 +159,7 @@ class Log {
         $logger = static::getSpecialLogger('sql', true);
 
         foreach ($logs as $v) {
-            $sql = '';
-            $sql .= $v['query'] . '|';
-            if ($v['bindings']) {
-                $sql .= implode(',', $v['bindings']);
-            }
-            $sql .= '|' . $v['time'];
-            $logger->info($sql);
+            $logger->info($v['time'] . '|' . $v['query'], $v['bindings']);
         }
     }
 

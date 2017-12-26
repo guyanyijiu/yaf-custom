@@ -86,6 +86,17 @@ class Response {
     ];
 
     /**
+     * header
+     *
+     * @var array
+     */
+    private static $headers = [
+        'json' => 'Content-Type: application/json; charset=utf-8',
+        'text' => 'Content-Type: text/plain; charset=utf-8',
+        'html' => 'Content-Type: text/html; charset=utf-8',
+    ];
+
+    /**
      * 返回一个自定义 http 状态码的响应
      *
      * @Author   liuchao
@@ -93,15 +104,16 @@ class Response {
      * @param int   $code
      * @param array $headers
      */
-    public static function http($code = 200, $headers = []){
-        $protocol =  Yaf_Dispatcher::getInstance()->getRequest()->getServer('SERVER_PROTOCOL', 'HTTP/1.1');
+    public static function http($code = 200, $headers = []) {
+        $protocol = isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
         $string = isset(self::$phrases[$code]) ? self::$phrases[$code] : '';
         header("$protocol $code $string");
-        if($headers){
-            foreach($headers as $k => $v){
+        if ($headers) {
+            foreach ($headers as $k => $v) {
                 header($k . ': ' . $v, true);
             }
         }
+        exit;
     }
 
     /**
@@ -109,10 +121,10 @@ class Response {
      *
      * @Author   liuchao
      *
-     * @param array  $data      数据
-     * @param string $message   提示信息
+     * @param array  $data    数据
+     * @param string $message 提示信息
      */
-    public static function success($data = null, $message = 'success'){
+    public static function success($data = null, $message = 'success') {
         self::json(self::SUCCESS, $data, $message);
     }
 
@@ -121,10 +133,10 @@ class Response {
      *
      * @Author   liuchao
      *
-     * @param array  $data      数据
-     * @param string $message   提示信息
+     * @param array  $data    数据
+     * @param string $message 提示信息
      */
-    public static function fail($message = 'fail', $data = null){
+    public static function fail($message = 'fail', $data = null) {
         self::json(self::FAIL, $data, $message);
     }
 
@@ -137,14 +149,14 @@ class Response {
      * @param array  $data      数据
      * @param string $message   提示信息
      */
-    public static function json($errno, $data = null, $message = ''){
+    public static function json($errno, $data = null, $message = '') {
         $ret = [
-            'errno' => $errno,
-            'errmsg' => $message,
+            'errno'     => $errno,
+            'errmsg'    => $message,
             'timestamp' => time(),
-            'data' => $data
+            'data'      => $data,
         ];
-        header('Content-Type: application/json; charset=utf-8');
+        header(static::$headers['json']);
         echo json_encode($ret, JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -158,30 +170,38 @@ class Response {
      * @param array  $data      数据
      * @param string $message   提示信息
      */
-    public static function jsonp($errno, $data = [], $message = ''){
+    public static function jsonp($errno, $data = [], $message = '') {
         $callback = Request::get('callback');
         $ret = [
-            'errno' => $errno,
-            'errmsg' => $message,
+            'errno'     => $errno,
+            'errmsg'    => $message,
             'timestamp' => time(),
-            'data' => $data
+            'data'      => $data,
         ];
-        header('Content-Type: application/json; charset=utf-8');
+        header(static::$headers['json']);
         echo $callback . '(' . json_encode($ret, JSON_UNESCAPED_UNICODE) . ')';
         exit;
     }
 
     /**
-     * 原生响应
+     *  原生响应
      *
      * @param        $data
      * @param string $type
      *
+     * @throws Exception
+     *
      * @author  liuchao
      */
-    public static function raw($data, $type = 'json'){
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    public static function raw($data, $type = 'json') {
+        if ( !isset(static::$headers[$type])) {
+            throw new \Exception('不支持的响应格式');
+        }
+        header(static::$headers[$type]);
+        if ($type == 'json') {
+            $data = json_encode($data, JSON_UNESCAPED_UNICODE);
+        }
+        print_r($data);
         exit;
     }
 
