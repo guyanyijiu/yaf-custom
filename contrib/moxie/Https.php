@@ -4,7 +4,7 @@ namespace Moxie;
  * Https请求
  */
 class Https{
-	static $result;
+	static $result; 
 	/**
 	 * 处理字符串
 	 * @param  [type] $data [description]
