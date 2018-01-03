@@ -51,11 +51,15 @@ class HandleExceptions {
      * @author  liuchao
      */
     public static function handleException(\Throwable $e) {
-        Log::exception('未捕获异常', [
-            'code'    => $e->getCode(),
-            'message' => $e->getMessage(),
-            'trace'   => $e->getTraceAsString(),
-        ]);
+        try {
+            Log::exception('未捕获异常', [
+                'code'    => $e->getCode(),
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+        } catch (\Throwable $e) {
+
+        }
 
         if (PHP_SAPI == 'cli') {
             static::renderForConsole($e);
