@@ -71,11 +71,6 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
 
             $db->setAsGlobal();
 
-            $db::enableQueryLog();
-            register_shutdown_function(function ($db) {
-                \Log::sql($db::getQueryLog());
-            }, $db);
-
             return $db;
         });
 

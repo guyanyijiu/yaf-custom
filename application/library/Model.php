@@ -17,14 +17,6 @@ class Model {
     protected $table;
 
     /**
-     * db 实例
-     *
-     * @var \Illuminate\Database\Capsule\Manager
-     */
-    protected static $resolver;
-
-
-    /**
      * 错误信息
      *
      * @var string
@@ -39,31 +31,16 @@ class Model {
      */
     public function __construct($table = null, $connection = null) {
 
-        if(!is_null($table)){
+        if ( !is_null($table)) {
             $this->table = $table;
         }
-        if(!is_null($connection)){
+        if ( !is_null($connection)) {
             $this->connection = $connection;
         }
 
-        if(is_null($this->table)){
+        if (is_null($this->table)) {
             $this->table = snake_case(class_basename(static::class));
         }
-    }
-
-    /**
-     * 获取一个查询构造器
-     *
-     * @return \Illuminate\Database\Capsule\Manager
-     *
-     * @author  liuchao
-     */
-    public function newQuery() {
-        if (is_null(self::$resolver)) {
-            self::$resolver = Yaf_Registry::get('container')['db'];
-        }
-
-        return (self::$resolver)::table($this->table, $this->connection);
     }
 
     /**
@@ -100,7 +77,7 @@ class Model {
      */
     public function __call($method, $parameters) {
         try {
-            return $this->newQuery()->$method(...$parameters);
+            return \DB::connection($this->connection)->table($this->table)->$method(...$parameters);
         } catch (\BadMethodCallException $e) {
             throw new BadMethodCallException(
                 sprintf('Call to undefined method %s::%s()', get_class($this), $method)

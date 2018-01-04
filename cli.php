@@ -29,6 +29,11 @@ $container->singleton('config', function (){
     return new \Config(CONF_PATH);
 });
 
+// 注册events
+$container->singleton('events', function ($container) {
+    return new \Illuminate\Events\Dispatcher($container);
+});
+
 // 注册db
 $container->singleton('db', function($container){
     $db = new \Illuminate\Database\Capsule\Manager($container);
@@ -36,11 +41,6 @@ $container->singleton('db', function($container){
     $container->make('config')->get('database.default', null, false);
 
     $db->setAsGlobal();
-
-    $db->setEventDispatcher(new \Illuminate\Events\Dispatcher($container));
-    $db::listen(function($query){
-        \Log::sql([['query' => $query->sql, 'bindings' => $query->bindings, 'time' => $query->time]]);
-    });
 
     return $db;
 });
