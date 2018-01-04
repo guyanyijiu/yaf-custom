@@ -1,6 +1,6 @@
 <?php
 namespace Moxie;
-use Response;
+use Response; 
 /**
  * 魔蝎类文件
  */
@@ -22,20 +22,20 @@ class MoxieBase{
 		}
 		//report需要email_id
 		if($param=='mailCard_report'){
-			$data['email_id']=isset($data['email_id'])?$data['email_id']:'';
+			$need['email_id']=isset($data['email_id'])?$data['email_id']:'';
 		}
 		switch ($param) {
 			case 'alipay':
-				$obj=new \Moxie\Alipay\FindInfo();
+				$obj=new Alipay\FindInfo();
 				break;
 			case 'mailCard':
-				$obj=new \Moxie\MailCard\FindInfo();
+				$obj=new MailCard\FindInfo();
 				break;
 			case 'mailCard_report':
-				$obj=new \Moxie\MailCard\Report();
+				$obj=new MailCard\Report();
 				break;
 			case 'onlineBank':
-				$obj=new \Moxie\OnLineBank\FindInfo();
+				$obj=new OnlineBank\FindInfo();
 				break;
 			
 			default:
@@ -46,9 +46,9 @@ class MoxieBase{
 		$res=json_decode($res);
 		if(isset($res->status) && $res->status!=200)
 		{
-			return json_encode($res);
+			return json_encode($res,JSON_UNESCAPED_UNICODE);
 		}
-	    return json_encode($res);		
+	    return json_encode($res,JSON_UNESCAPED_UNICODE);		
 	}
 
 

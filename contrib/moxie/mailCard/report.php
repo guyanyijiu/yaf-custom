@@ -15,7 +15,7 @@ class Report extends MoxieBase{
 	 * @return [type]          [description]
 	 */
 	public function getData($data){
-		$url=self::BASE_URL.self::REPORT.'/'.$data['task_id'].'/'.$data['email_id'];
+		$url=self::BASE_URL.self::REPORT.'/'.$data['email_id'].'/'.$data['task_id'];
 		$res=Https::get($url);
 		return $res;
 	}

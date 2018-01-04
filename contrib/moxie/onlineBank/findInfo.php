@@ -8,7 +8,7 @@ use Moxie\Https;
  */
 class FindInfo extends MoxieBase{
 
-	const FINDINFO='bank/v3/allcards/';
+	const FINDINFO='bank/v3/allcards';
 	/**
 	 * 获取数据
 	 * @param  [type] $task_id [description]
@@ -16,7 +16,7 @@ class FindInfo extends MoxieBase{
 	 */
 	public function getData($data){
 		$url=self::BASE_URL.self::FINDINFO;
-		$res=Https::get($url,$data['task_id']);
+		$res=Https::get($url,$data);
 		return $res;
 	}
 
