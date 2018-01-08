@@ -1,5 +1,7 @@
 <?php
 
+namespace Base;
+
 /**
  * Service 基类
  *

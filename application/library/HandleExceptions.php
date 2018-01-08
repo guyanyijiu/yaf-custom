@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * 异常处理类
+ *
+ * Class HandleExceptions
+ *
+ * @author  liuchao
+ */
 class HandleExceptions {
 
 
@@ -52,11 +59,7 @@ class HandleExceptions {
      */
     public static function handleException(\Throwable $e) {
         try {
-            Log::exception('未捕获异常', [
-                'code'    => $e->getCode(),
-                'message' => $e->getMessage(),
-                'trace'   => $e->getTraceAsString(),
-            ]);
+            static::record($e);
         } catch (\Throwable $e) {
 
         }
@@ -64,7 +67,23 @@ class HandleExceptions {
         if (PHP_SAPI == 'cli') {
             static::renderForConsole($e);
         } else {
-            static::renderHttpResponse($e);
+            static::renderForHttp($e);
+        }
+    }
+
+    /**
+     * 处理 PHP 异常退出
+     *
+     *
+     * @author  liuchao
+     */
+    public static function handleShutdown() {
+        if ( !is_null($error = error_get_last()) && static::isFatal($error['type'])) {
+            static::handleException(
+                new \ErrorException(
+                    $error['message'], $error['type'], 0, $error['file'], $error['line']
+                )
+            );
         }
     }
 
@@ -86,28 +105,50 @@ class HandleExceptions {
      *
      * @author  liuchao
      */
-    protected static function renderHttpResponse(\Throwable $e) {
+    protected static function renderForHttp(\Throwable $e) {
         if (YAF_ENVIRON == 'product') {
-            Response::fail('程序内部错误');
+            $message = '程序内部错误';
+        } else {
+            $message = $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine();
         }
 
-        Response::fail($e->getMessage());
+        \Response::fail($message)->send();
     }
 
     /**
-     * 处理 PHP 异常退出
+     * 生成一个异常响应
      *
+     * @param Throwable $e
+     *
+     * @return \Base\HttpResponse
      *
      * @author  liuchao
      */
-    public static function handleShutdown() {
-        if ( !is_null($error = error_get_last()) && static::isFatal($error['type'])) {
-            static::handleException(
-                new \ErrorException(
-                    $error['message'], $error['type'], 0, $error['file'], $error['line']
-                )
-            );
+    public static function makeExceptionResponse(\Throwable $e) {
+        if (YAF_ENVIRON == 'product') {
+            $message = '程序内部错误';
+        } else {
+            $message = $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine();
         }
+
+        static::record($e);
+
+        return \Response::fail($message);
+    }
+
+    /**
+     * 记录异常日志
+     *
+     * @param Throwable $e
+     *
+     * @author  liuchao
+     */
+    public static function record(\Throwable $e) {
+        \Log::exception('未捕获异常', [
+            'code'    => $e->getCode(),
+            'message' => $e->getMessage(),
+            'trace'   => $e->getTraceAsString(),
+        ]);
     }
 
     /**

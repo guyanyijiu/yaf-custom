@@ -51,7 +51,7 @@ class Http {
         if ( !is_null(static::$client)) {
             return static::$client;
         }
-        $args['headers']['Requestid'] = \Uniqid::getRequestId();
+        $args['headers']['QX-REQUESTID'] = \Uniqid::getRequestId();
 
         return static::$client = new Client($args);
 

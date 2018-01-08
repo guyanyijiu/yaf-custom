@@ -59,7 +59,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
         $container = new \Illuminate\Container\Container();
 
         // 注册config
-        $container->singleton('config', function (){
+        $container->singleton('config', function () {
             return new \Config(CONF_PATH);
         });
 
@@ -86,7 +86,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
      */
     public function _initRequestId(Yaf_Dispatcher $dispatcher) {
         // 先获取传递的requestId
-        $requestId = \Request::header('Requestid');
+        $requestId = $dispatcher->getRequest()->getServer('HTTP_QX_REQUESTID');
         if ($requestId) {
             \Uniqid::setRequestId($requestId);
         }
@@ -111,15 +111,15 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
     //     }
 
     /**
-     * 加载插件
+     * 加载插件，放在最后执行
      *
      * @Author   liuchao
      *
      * @param \Yaf_Dispatcher $dispacher
      */
-    //    public function _initPlugin(Yaf_Dispatcher $dispacher){
-    //         $dispacher->registerPlugin(new TestPlugin());
-    //         $dispacher->registerPlugin(new RequestPlugin());
-    //    }
+    public function _initPlugin(Yaf_Dispatcher $dispacher) {
+        // 必须第一个注册的插件
+        $dispacher->registerPlugin(new DispatchPlugin());
+    }
 
 }

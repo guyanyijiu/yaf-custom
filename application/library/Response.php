@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 响应类
+ * 业务响应类
  *
  * @Author   liuchao
  *
@@ -20,134 +20,43 @@ class Response {
     const FAIL = 400;
 
     /**
-     * http 响应码
+     * success
      *
-     * @var array
-     */
-    private static $phrases = [
-        100 => 'Continue',
-        101 => 'Switching Protocols',
-        102 => 'Processing',
-        200 => 'OK',
-        201 => 'Created',
-        202 => 'Accepted',
-        203 => 'Non-Authoritative Information',
-        204 => 'No Content',
-        205 => 'Reset Content',
-        206 => 'Partial Content',
-        207 => 'Multi-status',
-        208 => 'Already Reported',
-        300 => 'Multiple Choices',
-        301 => 'Moved Permanently',
-        302 => 'Found',
-        303 => 'See Other',
-        304 => 'Not Modified',
-        305 => 'Use Proxy',
-        306 => 'Switch Proxy',
-        307 => 'Temporary Redirect',
-        400 => 'Bad Request',
-        401 => 'Unauthorized',
-        402 => 'Payment Required',
-        403 => 'Forbidden',
-        404 => 'Not Found',
-        405 => 'Method Not Allowed',
-        406 => 'Not Acceptable',
-        407 => 'Proxy Authentication Required',
-        408 => 'Request Time-out',
-        409 => 'Conflict',
-        410 => 'Gone',
-        411 => 'Length Required',
-        412 => 'Precondition Failed',
-        413 => 'Request Entity Too Large',
-        414 => 'Request-URI Too Large',
-        415 => 'Unsupported Media Type',
-        416 => 'Requested range not satisfiable',
-        417 => 'Expectation Failed',
-        418 => 'I\'m a teapot',
-        422 => 'Unprocessable Entity',
-        423 => 'Locked',
-        424 => 'Failed Dependency',
-        425 => 'Unordered Collection',
-        426 => 'Upgrade Required',
-        428 => 'Precondition Required',
-        429 => 'Too Many Requests',
-        431 => 'Request Header Fields Too Large',
-        451 => 'Unavailable For Legal Reasons',
-        500 => 'Internal Server Error',
-        501 => 'Not Implemented',
-        502 => 'Bad Gateway',
-        503 => 'Service Unavailable',
-        504 => 'Gateway Time-out',
-        505 => 'HTTP Version not supported',
-        506 => 'Variant Also Negotiates',
-        507 => 'Insufficient Storage',
-        508 => 'Loop Detected',
-        511 => 'Network Authentication Required',
-    ];
-
-    /**
-     * header
+     * @param null   $data
+     * @param string $message
      *
-     * @var array
-     */
-    private static $headers = [
-        'json' => 'Content-Type: application/json; charset=utf-8',
-        'text' => 'Content-Type: text/plain; charset=utf-8',
-        'html' => 'Content-Type: text/html; charset=utf-8',
-    ];
-
-    /**
-     * 返回一个自定义 http 状态码的响应
+     * @return \Base\HttpResponse
      *
-     * @Author   liuchao
-     *
-     * @param int   $code
-     * @param array $headers
-     */
-    public static function http($code = 200, $headers = []) {
-        $protocol = isset($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1';
-        $string = isset(self::$phrases[$code]) ? self::$phrases[$code] : '';
-        header("$protocol $code $string");
-        if ($headers) {
-            foreach ($headers as $k => $v) {
-                header($k . ': ' . $v, true);
-            }
-        }
-        exit;
-    }
-
-    /**
-     * 成功响应
-     *
-     * @Author   liuchao
-     *
-     * @param array  $data    数据
-     * @param string $message 提示信息
+     * @author  liuchao
      */
     public static function success($data = null, $message = 'success') {
-        self::json(self::SUCCESS, $data, $message);
+        return self::json(self::SUCCESS, $data, $message);
     }
 
     /**
-     * 失败响应
+     * fail
      *
-     * @Author   liuchao
+     * @param string $message
+     * @param null   $data
      *
-     * @param array  $data    数据
-     * @param string $message 提示信息
+     * @return \Base\HttpResponse
+     *
+     * @author  liuchao
      */
     public static function fail($message = 'fail', $data = null) {
-        self::json(self::FAIL, $data, $message);
+        return self::json(self::FAIL, $data, $message);
     }
 
     /**
      * json 格式响应
      *
-     * @Author   liuchao
+     * @param        $errno
+     * @param null   $data
+     * @param string $message
      *
-     * @param        $errno     响应编码
-     * @param array  $data      数据
-     * @param string $message   提示信息
+     * @return \Base\HttpResponse
+     *
+     * @author  liuchao
      */
     public static function json($errno, $data = null, $message = '') {
         $ret = [
@@ -156,53 +65,23 @@ class Response {
             'timestamp' => time(),
             'data'      => $data,
         ];
-        header(static::$headers['json']);
-        echo json_encode($ret, JSON_UNESCAPED_UNICODE);
-        exit;
+
+        return new \Base\HttpResponse($ret);
     }
 
     /**
-     * jsonp 的响应
+     * 原生响应
      *
-     * @Author   liuchao
+     * @param       $data
+     * @param int   $code
+     * @param array $headers
      *
-     * @param        $errno     响应编码
-     * @param array  $data      数据
-     * @param string $message   提示信息
-     */
-    public static function jsonp($errno, $data = [], $message = '') {
-        $callback = Request::get('callback');
-        $ret = [
-            'errno'     => $errno,
-            'errmsg'    => $message,
-            'timestamp' => time(),
-            'data'      => $data,
-        ];
-        header(static::$headers['json']);
-        echo $callback . '(' . json_encode($ret, JSON_UNESCAPED_UNICODE) . ')';
-        exit;
-    }
-
-    /**
-     *  原生响应
-     *
-     * @param        $data
-     * @param string $type
-     *
-     * @throws Exception
+     * @return \Base\HttpResponse
      *
      * @author  liuchao
      */
-    public static function raw($data, $type = 'json') {
-        if ( !isset(static::$headers[$type])) {
-            throw new \Exception('不支持的响应格式');
-        }
-        header(static::$headers[$type]);
-        if ($type == 'json') {
-            $data = json_encode($data, JSON_UNESCAPED_UNICODE);
-        }
-        print_r($data);
-        exit;
+    public static function raw($data, $code = 200, $headers = []) {
+        return new \Base\HttpResponse($data, $code, $headers);
     }
 
 }
