@@ -130,7 +130,6 @@ class HttpRequest {
      * @author  liuchao
      */
     public function create($uri, $method = 'GET', $parameters = [], $server = [], $content = null) {
-        var_dump($uri);
         if ( !preg_match('/^\/([a-zA-Z_]+)\/([a-zA-Z_]+)\/([a-zA-Z_]+)$/', $uri, $matches)) {
             throw new \Exception($uri . ' not found');
         }
