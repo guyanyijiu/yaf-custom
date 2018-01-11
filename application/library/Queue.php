@@ -57,7 +57,7 @@ class Queue {
      *
      * @param $name
      *
-     * @return \Queue\Beanstalkd
+     * @return \Queue\QueueInterface
      *
      * @author  liuchao
      */
@@ -67,9 +67,11 @@ class Queue {
         if ( !$config) {
             throw new InvalidArgumentException("[$name] config is empty");
         }
-        switch ($name) {
+        switch ($config['driver']) {
             case 'beanstalkd':
                 return new Queue\Beanstalkd($config);
+            case 'rabbitmq':
+                return new \Queue\Rabbitmq($config);
         }
 
         throw new InvalidArgumentException("Unsupported driver [$name]");

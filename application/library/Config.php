@@ -70,19 +70,19 @@ class Config implements ArrayAccess {
 
         if ($pos) {
             $key = substr($name, $pos + 1);
-            if($configs instanceof \Yaf_Config_Ini){
-                if ( !isset($configs[$key])) {
+            if ($configs instanceof \Yaf_Config_Ini) {
+                $value = $configs->get($key);
+                if (is_null($value)) {
                     return $default;
                 }
-                $value = $configs->get($key);
-            }else{
+            } else {
                 $key = explode('.', $key);
                 $value = $configs;
-                foreach($key as $v){
-                    if(!$value[$v]){
+                foreach ($key as $v) {
+                    $value = $value->get($v);
+                    if (is_null($value)) {
                         return $default;
                     }
-                    $value = $value->get($v);
                 }
             }
             $value = $value instanceof \Yaf_Config_Abstract ? $value->toArray() : $value;
