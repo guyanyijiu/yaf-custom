@@ -61,11 +61,9 @@ class SwooleMaster {
      */
     public function __construct() {
         try {
-            \Log::info('测试');
             swoole_process::daemon();
             swoole_set_process_name('php ' . $this->proccess_name . ' : master');
             $this->master_pid = posix_getpid();
-
             $this->run();
             $this->processWait();
         } catch (\Exception $e) {
