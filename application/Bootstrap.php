@@ -65,13 +65,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
 
         // 注册db
         $container->singleton('db', function ($container) {
-            $db = new \Illuminate\Database\Capsule\Manager($container);
-
-            $container->make('config')->get('database.default', null, false);
-
-            $db->setAsGlobal();
-
-            return $db;
+            return new \DB($container);
         });
 
         Yaf_Registry::set('container', $container);

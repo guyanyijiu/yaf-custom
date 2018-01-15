@@ -24,6 +24,15 @@ class Model {
     protected $error;
 
     /**
+     * 非查询构造器方法
+     *
+     * @var array
+     */
+    protected $support = [
+        'raw', 'transaction', 'beginTransaction', 'rollBack', 'commit',
+    ];
+
+    /**
      * Model constructor.
      *
      * @param null $table
@@ -40,6 +49,47 @@ class Model {
 
         if (is_null($this->table)) {
             $this->table = snake_case(class_basename(static::class));
+        }
+    }
+
+    /**
+     * 获取连接
+     *
+     * @param null $name
+     *
+     * @return \Illuminate\Database\Connection
+     *
+     * @author  liuchao
+     */
+    public function connection($name = null) {
+        if (is_null($name)) {
+            $name = $this->connection;
+        }
+
+        return \DB::connection($name);
+    }
+
+    /**
+     * 代理方法调用
+     *
+     * @param $method
+     * @param $parameters
+     *
+     * @return mixed
+     *
+     * @author  liuchao
+     */
+    public function __call($method, $parameters) {
+        try {
+            if (in_array($method, $this->support)) {
+                return $this->connection($this->connection)->$method(...$parameters);
+            }
+
+            return $this->connection($this->connection)->table($this->table)->$method(...$parameters);
+        } catch (\BadMethodCallException $e) {
+            throw new BadMethodCallException(
+                sprintf('Call to undefined method %s::%s()', get_class($this), $method)
+            );
         }
     }
 
@@ -63,26 +113,6 @@ class Model {
      */
     public function getError() {
         return $this->error;
-    }
-
-    /**
-     * 代理方法调用
-     *
-     * @param $method
-     * @param $parameters
-     *
-     * @return mixed
-     *
-     * @author  liuchao
-     */
-    public function __call($method, $parameters) {
-        try {
-            return \DB::connection($this->connection)->table($this->table)->$method(...$parameters);
-        } catch (\BadMethodCallException $e) {
-            throw new BadMethodCallException(
-                sprintf('Call to undefined method %s::%s()', get_class($this), $method)
-            );
-        }
     }
 
     /**

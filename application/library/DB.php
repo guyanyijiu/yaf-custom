@@ -1,37 +1,122 @@
 <?php
 
-/**
- * DB操作类
- *
- * Class DB
- *
- * @author  liuchao
- */
+use Illuminate\Container\Container;
+use Illuminate\Database\DatabaseManager;
+use Illuminate\Database\Connectors\ConnectionFactory;
+
 class DB {
 
     /**
-     * 已经建立的连接
-     *
      * @var array
      */
-    private static $resolver = [];
+    protected static $resolver = [];
 
     /**
-     * 静态方法调用代理
-     *
-     * @Author   liuchao
-     *
-     * @param $method
-     * @param $parameters
-     *
-     * @return mixed
+     * @var \Illuminate\Contracts\Container\Container
      */
-    public static function __callStatic($method, $parameters) {
-        return static::connection()->$method(...$parameters);
+    protected $container;
+
+    /**
+     * @var \Illuminate\Database\DatabaseManager
+     */
+    protected $manager;
+
+    /**
+     * @var \DB
+     */
+    protected static $instance;
+
+    /**
+     * DBM constructor.
+     *
+     * @param Container|null $container
+     */
+    public function __construct(Container $container = null) {
+        $this->setupContainer($container ?: new Container);
+
+        $this->setupManager();
     }
 
     /**
-     * 获取数据库连接实例
+     * 设置容器
+     *
+     * @param Container $container
+     *
+     * @author  liuchao
+     */
+    protected function setupContainer(Container $container) {
+        $this->container = $container;
+    }
+
+    /**
+     * 设置 Database Manager
+     *
+     *
+     * @author  liuchao
+     */
+    protected function setupManager() {
+        $factory = new ConnectionFactory($this->container);
+
+        $this->manager = new DatabaseManager($this->container, $factory);
+    }
+
+    /**
+     * 获取 DB 实例
+     *
+     * @return DB
+     *
+     * @author  liuchao
+     */
+    public static function instance() {
+        if (is_null(static::$instance)) {
+            static::$instance = container('db');
+        }
+
+        return static::$instance;
+    }
+
+    /**
+     * 获取一个连接实例
+     *
+     * @param null $connection
+     *
+     * @return \Illuminate\Database\Connection
+     *
+     * @author  liuchao
+     */
+    public static function connection($connection = null) {
+        return static::instance()->getConnection($connection);
+    }
+
+    /**
+     * 获取一个查询构造器
+     *
+     * @param      $table
+     * @param null $connection
+     *
+     * @return \Illuminate\Database\Query\Builder
+     *
+     * @author  liuchao
+     */
+    public static function table($table, $connection = null) {
+        return static::connection($connection)->table($table);
+    }
+
+    /**
+     * 获取一个 schema 构造器实例
+     *
+     * @param null $connection
+     *
+     * @return \Illuminate\Database\Schema\Builder
+     *
+     * @author  liuchao
+     */
+    public static function schema($connection = null) {
+        return static::connection($connection)->getSchemaBuilder();
+    }
+
+    /**
+     * 获取连接实例
      *
      * @param null $name
      *
@@ -39,16 +124,18 @@ class DB {
      *
      * @author  liuchao
      */
-    public static function connection($name = null) {
+    public function getConnection($name = null) {
         if (is_null($name)) {
             $name = config('database.default');
         }
 
-        $connection = container('db')->getConnection($name);
+        $connection = $this->manager->connection($name);
+
         if ( !isset(static::$resolver[$name])) {
-            static::enableQueryLog($connection);
+            $this->enableQueryLog($connection);
             static::$resolver[$name] = true;
         }
+
         return $connection;
     }
 
@@ -59,7 +146,7 @@ class DB {
      *
      * @author  liuchao
      */
-    private static function enableQueryLog(\Illuminate\Database\Connection $connection) {
+    protected function enableQueryLog(\Illuminate\Database\Connection $connection) {
         if (PHP_SAPI == 'cli') {
             $connection->listen(function ($query) {
                 \Log::sql([['query' => $query->sql, 'bindings' => $query->bindings, 'time' => $query->time]]);
@@ -70,6 +157,20 @@ class DB {
                 \Log::sql($connection->getQueryLog());
             }, $connection);
         }
+    }
+
+    /**
+     * 代理静态方法调用
+     *
+     * @param $method
+     * @param $parameters
+     *
+     * @return mixed
+     *
+     * @author  liuchao
+     */
+    public static function __callStatic($method, $parameters) {
+        return static::connection()->$method(...$parameters);
     }
 
 }
