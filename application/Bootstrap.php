@@ -30,20 +30,14 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
     }
 
     /**
-     * 引入composer自动加载
+     * 引入基础文件
      *
      * @Author   liuchao
      */
-    public function _initComposer() {
+    public function _initLoadFile() {
+        // 引入composer自动加载
         Yaf_Loader::import(ROOT_PATH . '/vendor/autoload.php');
-    }
-
-    /**
-     * 引入辅助函数
-     *
-     * @Author   liuchao
-     */
-    public function _initHelpers() {
+        // 引入辅助函数
         Yaf_Loader::import(ROOT_PATH . '/helper/functions.php');
         Yaf_Loader::import(ROOT_PATH . '/helper/helpers.php');
     }
@@ -73,6 +67,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
             $config = $container->make('config')->get('database.redis');
             $driver = $config['client'];
             unset($config['client']);
+
             return new \Illuminate\Redis\RedisManager($driver, $config);
         });
 

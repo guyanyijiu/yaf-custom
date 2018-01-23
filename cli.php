@@ -7,7 +7,7 @@ date_default_timezone_set('PRC');
 define('YAF_START', microtime(true));
 
 // 项目根目录
-define("ROOT_PATH",  __DIR__);
+define("ROOT_PATH", __DIR__);
 
 // 根据ini配置加载项目配置文件目录
 $conf_path = ini_get('qx_partner.mark');
@@ -25,7 +25,7 @@ require ROOT_PATH . '/helper/helpers.php';
 $container = new \Illuminate\Container\Container();
 
 // 注册config
-$container->singleton('config', function (){
+$container->singleton('config', function () {
     return new \Config(CONF_PATH);
 });
 
@@ -35,8 +35,17 @@ $container->singleton('events', function ($container) {
 });
 
 // 注册db
-$container->singleton('db', function($container){
+$container->singleton('db', function ($container) {
     return new \DB($container);
+});
+
+// 注册 redis
+$container->singleton('redis', function ($container) {
+    $config = $container->make('config')->get('database.redis');
+    $driver = $config['client'];
+    unset($config['client']);
+
+    return new \Illuminate\Redis\RedisManager($driver, $config);
 });
 
 Yaf_Registry::set('container', $container);
