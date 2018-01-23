@@ -69,7 +69,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
         });
 
         // 注册 redis
-        $container->singleton('Redis', function ($container) {
+        $container->singleton('redis', function ($container) {
             $config = $container->make('config')->get('database.redis');
             $driver = $config['client'];
             unset($config['client']);

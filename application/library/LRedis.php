@@ -13,7 +13,7 @@ class LRedis {
 
     protected static function resolveInstance() {
         if ( !isset(static::$instance)) {
-            static::$instance = container('Redis');
+            static::$instance = container('redis');
         }
 
         return static::$instance;
