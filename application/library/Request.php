@@ -74,7 +74,7 @@ class Request {
      * @author  liuchao
      */
     public function header($name = null, $default = null) {
-        $this->request->getHeader($name, $default);
+        return $this->request->getHeader($name, $default);
     }
 
     /**
