@@ -20,6 +20,11 @@ class Response {
     const FAIL = 400;
 
     /**
+     * 未授权
+     */
+    const UNAUTH = 401;
+
+    /**
      * success
      *
      * @param null   $data
