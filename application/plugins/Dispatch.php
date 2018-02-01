@@ -12,6 +12,12 @@ class DispatchPlugin extends Yaf_Plugin_Abstract {
     public function dispatchLoopStartup(Yaf_Request_Abstract $request, Yaf_Response_Abstract $response) {
         // 构建 Request
         $request = (new \Base\HttpRequest())->withYafRequest($request);
+        // 针对跨域预检请求直接响应
+        if($request->method == 'OPTIONS'){
+            (new \Base\HttpResponse())->send();
+            exit;
+        }
+        
         $request = new \Request($request);
         // 注册到容器
         container()->instance('Request', $request);
