@@ -125,10 +125,19 @@ class HttpResponse {
      * @throws \InvalidArgumentException When the HTTP status code is not valid
      */
     public function __construct($content = '', $status = 200, $headers = []) {
+        // 跨域设置
+        if (config('application.app_cors')) {
+            $headers['Access-Control-Allow-Origin'] = config('application.app_cors_origin');
+            $headers['Access-Control-Allow-Methods'] = config('application.app_cors_methods');
+            $headers['Access-Control-Allow-Headers'] = config('application.app_cors_headers');
+        }
+
         $this->headers = $headers;
         $this->setContent($content);
         $this->setStatusCode($status);
         $this->setProtocolVersion('1.1');
+
+
     }
 
     /**
