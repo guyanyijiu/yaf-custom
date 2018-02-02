@@ -71,6 +71,8 @@ class Request {
      * @param null $name
      * @param null $default
      *
+     * @return array|mixed|null
+     *
      * @author  liuchao
      */
     public function header($name = null, $default = null) {
