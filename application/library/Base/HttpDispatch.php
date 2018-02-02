@@ -48,9 +48,15 @@ class HttpDispatch {
         try {
 
             $actionPath = APP_PATH . '/modules/' . $request->module . '/actions/' . $request->controller . '/' . $request->action . '.php';
-            \Yaf_Loader::import($actionPath);
+
+            if ( !\Yaf_Loader::import($actionPath)) {
+                throw new \Exceptions\ActionLoadFailedException('Bad URL');
+            }
 
             $class = '\\Actions\\' . $request->action;
+            if ( !class_exists($class)) {
+                throw new \Exceptions\ActionNotExistException('Action ' . $request->action . ' Not Found');
+            }
 
             return $this->prepareResponse(container()->call($class . '@execute'));
 

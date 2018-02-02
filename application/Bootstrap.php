@@ -15,6 +15,18 @@
 class Bootstrap extends Yaf_Bootstrap_Abstract {
 
     /**
+     * 引入基础文件
+     *
+     * @Author   liuchao
+     */
+    public function _initLoadFile() {
+        // 引入composer自动加载
+        Yaf_Loader::import(ROOT_PATH . '/vendor/autoload.php');
+        // 引入辅助函数
+        Yaf_Loader::import(APP_PATH . '/helpers.php');
+    }
+
+    /**
      * 初始化设置
      *
      * @Author   liuchao
@@ -27,19 +39,9 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
 
         // 关闭YAF自动渲染
         $dispatcher->autoRender(false);
-    }
 
-    /**
-     * 引入基础文件
-     *
-     * @Author   liuchao
-     */
-    public function _initLoadFile() {
-        // 引入composer自动加载
-        Yaf_Loader::import(ROOT_PATH . '/vendor/autoload.php');
-        // 引入辅助函数
-        Yaf_Loader::import(ROOT_PATH . '/helper/functions.php');
-        Yaf_Loader::import(ROOT_PATH . '/helper/helpers.php');
+        // 注册路由执行插件
+        $dispatcher->registerPlugin(new DispatchPlugin());
     }
 
     /**
@@ -106,17 +108,5 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
     //             }
     //         }
     //     }
-
-    /**
-     * 加载插件，放在最后执行
-     *
-     * @Author   liuchao
-     *
-     * @param \Yaf_Dispatcher $dispacher
-     */
-    public function _initPlugin(Yaf_Dispatcher $dispacher) {
-        // 必须第一个注册的插件
-        $dispacher->registerPlugin(new DispatchPlugin());
-    }
 
 }

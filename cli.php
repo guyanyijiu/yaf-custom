@@ -15,8 +15,7 @@ $conf_path = $conf_path ? 'conf/' . $conf_path : 'conf';
 define("CONF_PATH", ROOT_PATH . '/' . $conf_path);
 
 require ROOT_PATH . '/vendor/autoload.php';
-require ROOT_PATH . '/helper/functions.php';
-require ROOT_PATH . '/helper/helpers.php';
+require APP_PATH . '/helpers.php';
 
 // 注册异常处理
 \HandleExceptions::register();
