@@ -17,7 +17,6 @@ class Rpc {
      * @param array $args
      *
      * @return string
-     * @throws Exception
      *
      * @author  liuchao
      */
@@ -25,32 +24,31 @@ class Rpc {
         $server = isset($args['server']) ? $args['server'] : [];
         $headers = isset($args['headers']) ? $args['headers'] : [];
 
-        return static::dispatch('GET', $url, $query, $server);
+        return static::dispatch('GET', $url, $query, [], $server);
     }
 
     /**
      * POST 调用
      *
      * @param        $url
-     * @param array  $query
+     * @param array  $data
      * @param string $body
      * @param array  $args
      *
      * @return string
-     * @throws Exception
      *
      * @author  liuchao
      */
-    public static function post($url, array $query = [], $body = 'form', $args = []) {
+    public static function post($url, array $data = [], $body = 'form', $args = []) {
         $server = isset($args['server']) ? $args['server'] : [];
         $headers = isset($args['headers']) ? $args['headers'] : [];
         $content = null;
         if ($body == 'json') {
-            $content = json_encode($query, JSON_UNESCAPED_UNICODE);
-            $query = [];
+            $content = json_encode($data, JSON_UNESCAPED_UNICODE);
+            $data = [];
         }
 
-        return static::dispatch('POST', $url, $query, $server, $content);
+        return static::dispatch('POST', $url, [], $data, $server, $content);
     }
 
     /**
@@ -58,16 +56,16 @@ class Rpc {
      *
      * @param       $method
      * @param       $uri
-     * @param       $parameters
+     * @param array $get
+     * @param array $post
      * @param array $server
      * @param null  $content
      *
      * @return string
-     * @throws Exception
      *
      * @author  liuchao
      */
-    private static function dispatch($method, $uri, $parameters, $server = [], $content = null) {
+    private static function dispatch($method, $uri, $get = [], $post = [], $server = [], $content = null) {
 
         try {
             $container = container();
@@ -75,7 +73,7 @@ class Rpc {
             $originalRequest = $container->make(Request::class);
             $originalResponse = $container->make(Response::class);
 
-            $request = Request::create($uri, $method, $parameters, [], $server, $content);
+            $request = new Request($uri, $method, $get, $post, $server, $content);
             $response = new Response();
 
             $container->instance(Request::class, $request);

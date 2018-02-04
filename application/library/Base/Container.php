@@ -38,10 +38,10 @@ class Container extends IlluminateContainer {
      * @author  liuchao
      */
     public function run(\Request $request = null, \Response $response = null) {
-        if(is_null($request)){
+        if (is_null($request)) {
             $request = $this->resolve(\Request::class);
         }
-        if(is_null($response)){
+        if (is_null($response)) {
             $response = $this->resolve(\Response::class);
         }
 
@@ -113,6 +113,38 @@ class Container extends IlluminateContainer {
         }
 
         return $this->addMiddleware(new DeferredCallable($middleware, $this));
+    }
+
+    /**
+     * 注册事件监听
+     *
+     * @param array $listen
+     *
+     * @author  liuchao
+     */
+    public function listen(array $listen) {
+        $events = $this->resolve('events');
+
+        foreach ($listen as $event => $listeners) {
+            foreach ($listeners as $listener) {
+                $events->listen($event, $listener);
+            }
+        }
+    }
+
+    /**
+     * 注册事件订阅
+     *
+     * @param array $subscribe
+     *
+     * @author  liuchao
+     */
+    public function subscribe(array $subscribe) {
+        $events = $this->resolve('events');
+
+        foreach ($subscribe as $subscriber) {
+            $events->subscribe($subscriber);
+        }
     }
 
     /**

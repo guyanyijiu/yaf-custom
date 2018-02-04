@@ -46,7 +46,7 @@ class Log {
             $logFile = config('application.log_path') . '/' . config('application.app_name') . '/' . $moduleName . '/' . $controllerName . '/' . date('Y-m-d') . '.log';
             $fileHandler = new AggregateFileHandler($logFile, Logger::DEBUG);
             $fileHandler->setFormatter(
-                new LineFormatter(Uniqid::getRequestId() . "|%datetime%|%channel%|%level_name%|%message%|%context%|%extra%\n", 'Y-m-d H:i:s.u')
+                new LineFormatter(\Uniqid::getRequestId() . "|%datetime%|%channel%|%level_name%|%message%|%context%|%extra%\n", 'Y-m-d H:i:s.u')
             );
             $bufferHandler = new BufferHandler($fileHandler, 100, Logger::DEBUG, false, true);
 
@@ -114,7 +114,7 @@ class Log {
             if ($is_buffer) {
                 $fileHandler = new \Log\AggregateHandler($logFile, Logger::DEBUG);
                 $fileHandler->setFormatter(
-                    new LineFormatter(Uniqid::getRequestId() . "|%datetime%|%channel%|$type|%message%|%context%\n", 'Y-m-d H:i:s.u')
+                    new LineFormatter(\Uniqid::getRequestId() . "|%datetime%|%channel%|$type|%message%|%context%\n", 'Y-m-d H:i:s.u')
                 );
                 $handler = new BufferHandler($fileHandler, 100, Logger::DEBUG, false, true);
             } else {

@@ -59,12 +59,12 @@ class HttpRouter {
         $actionFile = APP_PATH . '/modules/' . $request->getModule() . '/actions/' . $request->getController() . '/' . $request->getAction() . '.php';
 
         if ( !\Yaf_Loader::import($actionFile)) {
-            throw new \Exceptions\ActionLoadFailedException('Bad URL');
+            throw new \Exceptions\ActionLoadFailedException('Bad URL [' . $request->getUri() . '] ');
         }
 
         $action = '\\Actions\\' . $request->action;
         if ( !class_exists($action)) {
-            throw new \Exceptions\ActionNotExistException('Action ' . $request->action . ' Not Found');
+            throw new \Exceptions\ActionNotExistException('Action [' . $request->action . '] Not Found');
         }
 
         $response = $this->container->call($action . '@execute');

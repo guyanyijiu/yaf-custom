@@ -121,7 +121,6 @@ class HandleExceptions {
      * @param Throwable $e
      *
      * @return Response
-     * @throws Exception
      *
      * @author  liuchao
      */
@@ -132,7 +131,11 @@ class HandleExceptions {
             $message = $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine();
         }
 
-        static::record($e);
+        try {
+            static::record($e);
+        } catch (\Throwable $e) {
+
+        }
 
         return \Response::fail($message);
     }

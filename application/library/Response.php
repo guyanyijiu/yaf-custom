@@ -71,7 +71,7 @@ class Response extends \Base\HttpResponse {
             'data'      => $data,
         ];
 
-        return static::$instance->setContent($ret);
+        return static::getInstance()->setContent($ret);
     }
 
     /**
@@ -86,7 +86,7 @@ class Response extends \Base\HttpResponse {
      * @author  liuchao
      */
     public static function raw($data, $code = 200, $headers = []) {
-        return static::$instance->setContent($data)->setStatusCode($code)->setHeaders($headers);
+        return static::getInstance()->setContent($data)->setStatusCode($code)->setHeaders($headers);
     }
 
 }

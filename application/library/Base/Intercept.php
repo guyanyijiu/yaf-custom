@@ -14,10 +14,13 @@ class Intercept extends \Yaf_Plugin_Abstract {
     public function dispatchLoopStartup(\Yaf_Request_Abstract $request, \Yaf_Response_Abstract $response) {
         $container = container();
 
-        $container->instance(\Request::class, (new \Request())->withYafRequest($request) );
-        $container->instance(\Response::class, new \Response());
+        $request = (new \Request())->withYafRequest($request);
+        $response = new \Response();
 
-        $container->run();
+        $container->instance(\Request::class, $request);
+        $container->instance(\Response::class, $response);
+
+        $container->run($request, $response);
 
         // 结束
         exit;

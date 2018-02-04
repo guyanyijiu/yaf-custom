@@ -11,16 +11,16 @@ if ( !function_exists('container')) {
      *
      * @param null $name
      *
-     * @return mixed
+     * @return mixed|\Base\Container
      *
      * @author  liuchao
      */
     function container($name = null) {
         if ($name) {
-            return (Yaf_Registry::get('container'))->make($name);
+            return \Base\Container::getInstance()->make($name);
         }
 
-        return Yaf_Registry::get('container');
+        return \Base\Container::getInstance();
     }
 }
 
@@ -43,6 +43,24 @@ if ( !function_exists('config')) {
         }
 
         return container('config')->get($key, $default);
+    }
+}
+
+if ( !function_exists('event')) {
+
+    /**
+     * 触发事件并调用监听者
+     *
+     * @param       $event
+     * @param array $payload
+     * @param bool  $halt
+     *
+     * @return mixed
+     *
+     * @author  liuchao
+     */
+    function event($event, $payload = [], $halt = false) {
+        return container('events')->fire($event, $payload, $halt);
     }
 }
 

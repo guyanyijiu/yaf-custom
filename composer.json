@@ -15,7 +15,9 @@
             "Services\\": "application/services",
             "Models\\": "application/models",
             "Contrib\\": "contrib",
-            "Middleware\\": "application/middleware"
+            "Middleware\\": "application/middleware",
+            "Events\\": "application/events",
+            "Listeners\\": "application/listeners"
         }
     }
 }

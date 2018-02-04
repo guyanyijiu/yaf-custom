@@ -128,7 +128,33 @@ class HttpResponse {
         $this->setStatusCode($status);
         $this->setProtocolVersion('1.1');
 
-        static::$instance = $this;
+        static::setInstance($this);
+    }
+
+    /**
+     * 获取 response 实例
+     *
+     * @return HttpResponse
+     *
+     * @author  liuchao
+     */
+    public static function getInstance() {
+        if (is_null(static::$instance)) {
+            static::$instance = new static();
+        }
+
+        return static::$instance;
+    }
+
+    /**
+     * 设置 response 实例
+     *
+     * @param HttpResponse $instance
+     *
+     * @author  liuchao
+     */
+    public static function setInstance(HttpResponse $instance) {
+        static::$instance = $instance;
     }
 
     /**

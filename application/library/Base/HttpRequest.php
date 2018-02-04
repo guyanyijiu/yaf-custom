@@ -82,12 +82,37 @@ class HttpRequest {
     /**
      * HttpRequest constructor.
      *
+     * @param null  $uri
+     * @param null  $method
      * @param array $get
      * @param array $post
      * @param array $server
      * @param null  $content
+     *
+     * @throws \Exception
      */
-    public function __construct($get = [], $post = [], $server = [], $content = null) {
+    public function __construct($uri = null, $method = null, $get = [], $post = [], $server = [], $content = null) {
+
+        if ( !is_null($uri)) {
+            if ( !preg_match('/^\/([a-zA-Z_]+)\/([a-zA-Z_]+)\/([a-zA-Z_]+)$/', $uri, $matches)) {
+                throw new \Exception('Bad URL :' . $uri);
+            }
+            $this->setUri($uri);
+            $this->setModule(ucfirst($matches[1]));
+            $this->setController(ucfirst($matches[2]));
+            $this->setAction($matches[3]);
+        }
+        if ( !is_null($method)) {
+            if ( !in_array(strtoupper($method), [
+                'GET',
+                'POST',
+            ])) {
+                throw new \Exception('Bad Method :' . $method);
+            }
+            $this->setMethod($method);
+
+        }
+
         $this->setGet($get);
         $this->setPost($post);
         $this->setServer($server);
@@ -122,56 +147,18 @@ class HttpRequest {
     }
 
     /**
-     * 创建一个新的请求实例
-     *
-     * @param       $uri
-     * @param       $method
-     * @param array $get
-     * @param array $post
-     * @param array $server
-     * @param null  $content
-     *
-     * @return static
-     * @throws \Exception
-     *
-     * @author  liuchao
-     */
-    public static function create($uri, $method, $get = [], $post = [], $server = [], $content = null) {
-        if ( !preg_match('/^\/([a-zA-Z_]+)\/([a-zA-Z_]+)\/([a-zA-Z_]+)$/', $uri, $matches)) {
-            throw new \Exception('Bad URL :' . $uri);
-        }
-
-        if ( !in_array(strtoupper($method), [
-            'GET',
-            'POST',
-        ])) {
-            throw new \Exception('Bad Method :' . $method);
-        }
-
-        $instance = new static($get, $post, $server, $content);
-
-        $instance->setUri($uri);
-        $instance->setMethod($method);
-
-        $instance->setModule($matches[1]);
-        $instance->setController($matches[2]);
-        $instance->setAction($matches[3]);
-
-        $instance->setServer($server);
-        $instance->setContent($content);
-
-        return $instance;
-    }
-
-    /**
      * 设置 module
      *
      * @param $module
+     *
+     * @return $this
      *
      * @author  liuchao
      */
     public function setModule($module) {
         $this->module = $module;
+
+        return $this;
     }
 
     /**
@@ -179,10 +166,14 @@ class HttpRequest {
      *
      * @param $controller
      *
+     * @return $this
+     *
      * @author  liuchao
      */
     public function setController($controller) {
         $this->controller = $controller;
+
+        return $this;
     }
 
     /**
@@ -190,10 +181,14 @@ class HttpRequest {
      *
      * @param $action
      *
+     * @return $this
+     *
      * @author  liuchao
      */
     public function setAction($action) {
         $this->action = $action;
+
+        return $this;
     }
 
     /**
@@ -201,10 +196,14 @@ class HttpRequest {
      *
      * @param $method
      *
+     * @return $this
+     *
      * @author  liuchao
      */
     public function setMethod($method) {
         $this->method = $method;
+
+        return $this;
     }
 
     /**
@@ -212,10 +211,14 @@ class HttpRequest {
      *
      * @param $uri
      *
+     * @return $this
+     *
      * @author  liuchao
      */
     public function setUri($uri) {
         $this->uri = $uri;
+
+        return $this;
     }
 
     /**
@@ -223,10 +226,14 @@ class HttpRequest {
      *
      * @param $get
      *
+     * @return $this
+     *
      * @author  liuchao
      */
     public function setGet($get) {
         $this->get = $get;
+
+        return $this;
     }
 
     /**
@@ -234,10 +241,14 @@ class HttpRequest {
      *
      * @param $post
      *
+     * @return $this
+     *
      * @author  liuchao
      */
     public function setPost($post) {
         $this->post = $post;
+
+        return $this;
     }
 
     /**
@@ -245,10 +256,14 @@ class HttpRequest {
      *
      * @param $server
      *
+     * @return $this
+     *
      * @author  liuchao
      */
     public function setServer($server) {
         $this->server = $server;
+
+        return $this;
     }
 
     /**
@@ -256,10 +271,14 @@ class HttpRequest {
      *
      * @param $content
      *
+     * @return $this
+     *
      * @author  liuchao
      */
     public function setContent($content) {
         $this->content = $content;
+
+        return $this;
     }
 
     /**
@@ -409,6 +428,5 @@ class HttpRequest {
 
         return isset($headers[$key]) ? $headers[$key] : $default;
     }
-
-
+    
 }

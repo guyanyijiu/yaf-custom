@@ -56,55 +56,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
             return new \Config(CONF_PATH);
         });
 
-        // 注册db
-        $container->singleton('db', function ($container) {
-            return new \DB($container);
-        });
-
-        // 注册 redis
-        $container->singleton('redis', function ($container) {
-            $config = $container->make('config')->get('database.redis');
-            $driver = $config['client'];
-            unset($config['client']);
-
-            return new \Illuminate\Redis\RedisManager($driver, $config);
-        });
-
-        Yaf_Registry::set('container', $container);
+        require APP_PATH . '/Application.php';
     }
-
-    /**
-     * 注册自定义服务
-     *
-     * @Author   liuchao
-     */
-//    public function _initContainer() {
-//        $container = container();
-//    }
-
-    /**
-     * 注册中间件
-     *
-     * 按照中间件注册的顺序，请求处理前逻辑是倒序执行，请求处理后逻辑是正序执行
-     *
-     * @author  liuchao
-     */
-//    public function _initMiddleware(){
-//        $container = container();
-
-//        $container->middleware(function(\Request $request, \Response $response, $next){
-//            // 请求处理前逻辑
-//
-//            $response = $next($request, $response);
-//
-//            // 请求处理后逻辑
-//
-//            return $response;
-//        });
-
-//        $container->middleware([
-//            Middleware\Example::class,
-//        ]);
-//    }
 
 }
