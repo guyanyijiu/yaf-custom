@@ -99,11 +99,12 @@ class Config implements ArrayAccess {
     /**
      * 获取一个配置文件的所有数据
      *
-     * @Author   liuchao
+     * @param $fileName
      *
-     * @param      $fileName
+     * @return mixed|null|Yaf_Config_Ini|Yaf_Config_Simple
+     * @throws Yaf_Exception_TypeError
      *
-     * @return null|Yaf_Config_Abstract
+     * @author  liuchao
      */
     private function getFileConfiguration($fileName) {
         if (isset($this->configFiles[$fileName])) {

@@ -2,7 +2,6 @@
 
 class Queue {
 
-
     protected $container;
 
     /**
@@ -16,7 +15,7 @@ class Queue {
      * Queue constructor.
      */
     public function __construct() {
-        $this->container = Yaf_Registry::get('container');
+        $this->container = container();
     }
 
     public static function onConnection($name = null) {

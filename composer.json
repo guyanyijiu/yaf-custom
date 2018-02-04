@@ -14,7 +14,8 @@
             "": "application/library",
             "Services\\": "application/services",
             "Models\\": "application/models",
-            "Contrib\\": "contrib"
+            "Contrib\\": "contrib",
+            "Middleware\\": "application/middleware"
         }
     }
 }

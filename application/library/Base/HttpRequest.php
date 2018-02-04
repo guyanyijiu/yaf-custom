@@ -11,6 +11,11 @@ namespace Base;
 class HttpRequest {
 
     /**
+     * @var static
+     */
+    public static $instance;
+
+    /**
      * 模块名
      *
      * @var string
@@ -88,6 +93,7 @@ class HttpRequest {
         $this->setServer($server);
         $this->setContent($content);
 
+        static::$instance = $this;
     }
 
     /**
@@ -116,46 +122,45 @@ class HttpRequest {
     }
 
     /**
-     * 创建一个请求实例
+     * 创建一个新的请求实例
      *
-     * @param        $uri
-     * @param string $method
-     * @param array  $parameters
-     * @param array  $server
-     * @param null   $content
+     * @param       $uri
+     * @param       $method
+     * @param array $get
+     * @param array $post
+     * @param array $server
+     * @param null  $content
      *
-     * @return $this
+     * @return static
      * @throws \Exception
      *
      * @author  liuchao
      */
-    public function create($uri, $method = 'GET', $parameters = [], $server = [], $content = null) {
+    public static function create($uri, $method, $get = [], $post = [], $server = [], $content = null) {
         if ( !preg_match('/^\/([a-zA-Z_]+)\/([a-zA-Z_]+)\/([a-zA-Z_]+)$/', $uri, $matches)) {
-            throw new \Exception($uri . ' not found');
+            throw new \Exception('Bad URL :' . $uri);
         }
 
-        $this->setUri($uri);
-        $this->method = strtoupper($method);
-
-        switch ($this->method) {
-            case 'GET':
-                $this->setGet($parameters);
-                break;
-            case 'POST':
-                $this->setPost($parameters);
-                break;
-            default:
-                throw new \Exception($method . ' not support method');
+        if ( !in_array(strtoupper($method), [
+            'GET',
+            'POST',
+        ])) {
+            throw new \Exception('Bad Method :' . $method);
         }
 
-        $this->setModule($matches[1]);
-        $this->setController($matches[2]);
-        $this->setAction($matches[3]);
+        $instance = new static($get, $post, $server, $content);
 
-        $this->setServer($server);
-        $this->setContent($content);
+        $instance->setUri($uri);
+        $instance->setMethod($method);
 
-        return $this;
+        $instance->setModule($matches[1]);
+        $instance->setController($matches[2]);
+        $instance->setAction($matches[3]);
+
+        $instance->setServer($server);
+        $instance->setContent($content);
+
+        return $instance;
     }
 
     /**
@@ -362,7 +367,7 @@ class HttpRequest {
             return $this->server;
         }
 
-        return isset($this->post[$name]) ? $this->post[$name] : null;
+        return isset($this->server[$name]) ? $this->server[$name] : null;
     }
 
     /**

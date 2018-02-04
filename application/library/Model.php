@@ -1,6 +1,10 @@
 <?php
 
+use Base\ErrorMessageTrait;
+
 class Model {
+
+    use ErrorMessageTrait;
 
     /**
      * 连接名
@@ -15,13 +19,6 @@ class Model {
      * @var string
      */
     protected $table;
-
-    /**
-     * 错误信息
-     *
-     * @var string
-     */
-    protected $error;
 
     /**
      * 非查询构造器方法
@@ -91,28 +88,6 @@ class Model {
                 sprintf('Call to undefined method %s::%s()', get_class($this), $method)
             );
         }
-    }
-
-    /**
-     * 设置错误信息
-     *
-     * @param $error
-     *
-     * @author  liuchao
-     */
-    public function setError($error) {
-        $this->error = $error;
-    }
-
-    /**
-     * 获取错误信息
-     *
-     * @return string
-     *
-     * @author  liuchao
-     */
-    public function getError() {
-        return $this->error;
     }
 
     /**

@@ -17,6 +17,7 @@ class Rpc {
      * @param array $args
      *
      * @return string
+     * @throws Exception
      *
      * @author  liuchao
      */
@@ -36,6 +37,7 @@ class Rpc {
      * @param array  $args
      *
      * @return string
+     * @throws Exception
      *
      * @author  liuchao
      */
@@ -52,7 +54,7 @@ class Rpc {
     }
 
     /**
-     * 路由
+     * 执行
      *
      * @param       $method
      * @param       $uri
@@ -61,27 +63,34 @@ class Rpc {
      * @param null  $content
      *
      * @return string
+     * @throws Exception
      *
      * @author  liuchao
      */
     private static function dispatch($method, $uri, $parameters, $server = [], $content = null) {
 
-        $originalRequest = container('Request');
-
         try {
-            $request = (new \Base\HttpRequest())->create($uri, $method, $parameters, $server, $content);
-            $request = new \Request($request);
-            container()->instance('Request', $request);
+            $container = container();
 
-            $response = (new \Base\HttpDispatch())->dispatch($request);
+            $originalRequest = $container->make(Request::class);
+            $originalResponse = $container->make(Response::class);
 
+            $request = Request::create($uri, $method, $parameters, [], $server, $content);
+            $response = new Response();
+
+            $container->instance(Request::class, $request);
+            $container->instance(Response::class, $response);
+
+            $response = $container->process($request, $response);
+
+            $container->instance(Request::class, $originalRequest);
+            $container->instance(Response::class, $originalResponse);
+
+            return $response->getContent();
         } catch (\Throwable $e) {
-            $response = \HandleExceptions::makeExceptionResponse($e);
+            return \HandleExceptions::makeExceptionResponse($e)->getContent();
         }
 
-        container()->instance('Request', $originalRequest);
-
-        return $response->getContent();
     }
 
 

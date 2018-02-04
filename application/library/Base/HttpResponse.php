@@ -17,14 +17,14 @@ use JsonSerializable;
 class HttpResponse {
 
     /**
+     * @var static
+     */
+    public static $instance;
+
+    /**
      * @var array
      */
     public $headers;
-
-    /**
-     * @var mixed
-     */
-    public $original;
 
     /**
      * @var string
@@ -47,8 +47,6 @@ class HttpResponse {
     protected $statusText;
 
     /**
-     * Status codes translation table.
-     *
      * @var array
      */
     public static $statusTexts = [
@@ -125,25 +123,20 @@ class HttpResponse {
      * @throws \InvalidArgumentException When the HTTP status code is not valid
      */
     public function __construct($content = '', $status = 200, $headers = []) {
-        // 跨域设置
-        if (config('application.app_cors')) {
-            $headers['Access-Control-Allow-Origin'] = config('application.app_cors_origin');
-            $headers['Access-Control-Allow-Methods'] = config('application.app_cors_methods');
-            $headers['Access-Control-Allow-Headers'] = config('application.app_cors_headers');
-        }
-
         $this->headers = $headers;
         $this->setContent($content);
         $this->setStatusCode($status);
         $this->setProtocolVersion('1.1');
 
-
+        static::$instance = $this;
     }
 
     /**
-     * Sends HTTP headers.
+     * 发送 header
      *
      * @return $this
+     *
+     * @author  liuchao
      */
     public function sendHeaders() {
         if (headers_sent()) {
@@ -166,9 +159,11 @@ class HttpResponse {
     }
 
     /**
-     * Sends content for the current web response.
+     * 发送响应内容
      *
      * @return $this
+     *
+     * @author  liuchao
      */
     public function sendContent() {
         echo $this->content;
@@ -177,9 +172,11 @@ class HttpResponse {
     }
 
     /**
-     * Sends HTTP headers and content.
+     * 发送响应
      *
      * @return $this
+     *
+     * @author  liuchao
      */
     public function send() {
         $this->sendHeaders();
@@ -192,8 +189,17 @@ class HttpResponse {
         return $this;
     }
 
-    public function setContent($content) {
-        $this->original = $content;
+    /**
+     * 设置响应内容
+     *
+     * @param      $content
+     * @param bool $append
+     *
+     * @return $this
+     *
+     * @author  liuchao
+     */
+    public function setContent($content, $append = false) {
 
         if ($this->shouldBeJson($content)) {
             $this->setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -205,11 +211,22 @@ class HttpResponse {
             throw new \UnexpectedValueException(sprintf('The Response content must be a string or object implementing __toString(), "%s" given.', gettype($content)));
         }
 
-        $this->content = (string) $content;
+        $this->content = $append == true ? $this->content . (string) $content : (string) $content;
 
         return $this;
     }
 
+    /**
+     * 设置一个 header
+     *
+     * @param      $key
+     * @param      $value
+     * @param bool $replace
+     *
+     * @return $this
+     *
+     * @author  liuchao
+     */
     public function setHeader($key, $value, $replace = true) {
         if ( !isset($this->headers[$key]) || $replace == true) {
             $this->headers[$key] = $value;
@@ -219,11 +236,33 @@ class HttpResponse {
     }
 
     /**
-     * Determine if the given content should be turned into JSON.
+     * 设置多个 header
      *
-     * @param  mixed $content
+     * @param array $headers
+     * @param bool  $replace
+     *
+     * @return $this
+     *
+     * @author  liuchao
+     */
+    public function setHeaders(array $headers, $replace = true) {
+        foreach ($headers as $k => $v) {
+            if ( !isset($this->headers[$k]) || $replace == true) {
+                $this->headers[$k] = $v;
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * 检测是否可以编码为 json
+     *
+     * @param $content
      *
      * @return bool
+     *
+     * @author  liuchao
      */
     protected function shouldBeJson($content) {
         return $content instanceof Arrayable ||
@@ -234,40 +273,44 @@ class HttpResponse {
     }
 
     /**
-     * Morph the given content into JSON.
+     * 将 content 转为 json
      *
-     * @param  mixed $content
+     * @param $content
      *
      * @return string
+     *
+     * @author  liuchao
      */
     protected function morphToJson($content) {
         if ($content instanceof Jsonable) {
             return $content->toJson();
         } elseif ($content instanceof Arrayable) {
-            return json_encode($content->toArray());
+            return json_encode($content->toArray(), JSON_UNESCAPED_UNICODE);
         }
 
-        return json_encode($content);
+        return json_encode($content, JSON_UNESCAPED_UNICODE);
     }
 
 
     /**
-     * Gets the current response content.
+     * 获取 content
      *
-     * @return string Content
+     * @return string
+     *
+     * @author  liuchao
      */
     public function getContent() {
         return $this->content;
     }
 
     /**
-     * Sets the HTTP protocol version (1.0 or 1.1).
+     * 设置 http 协议版本号
      *
-     * @param string $version The HTTP protocol version
+     * @param $version
      *
      * @return $this
      *
-     * @final since version 3.2
+     * @author  liuchao
      */
     public function setProtocolVersion($version) {
         $this->version = $version;
@@ -276,30 +319,25 @@ class HttpResponse {
     }
 
     /**
-     * Gets the HTTP protocol version.
+     * 获取 http 协议版本号
      *
-     * @return string The HTTP protocol version
+     * @return string
      *
-     * @final since version 3.2
+     * @author  liuchao
      */
     public function getProtocolVersion() {
         return $this->version;
     }
 
     /**
-     * Sets the response status code.
+     * 设置 http 状态码
      *
-     * @param int   $code HTTP status code
-     * @param mixed $text HTTP status text
-     *
-     * If the status text is null it will be automatically populated for the known
-     * status codes and left empty otherwise.
+     * @param      $code
+     * @param null $text
      *
      * @return $this
      *
-     * @throws \InvalidArgumentException When the HTTP status code is not valid
-     *
-     * @final since version 3.2
+     * @author  liuchao
      */
     public function setStatusCode($code, $text = null) {
         $this->statusCode = $code = (int) $code;
@@ -325,11 +363,11 @@ class HttpResponse {
     }
 
     /**
-     * Retrieves the status code for the current web response.
+     * 获取 http 状态码
      *
-     * @return int Status code
+     * @return int
      *
-     * @final since version 3.2
+     * @author  liuchao
      */
     public function getStatusCode() {
         return $this->statusCode;

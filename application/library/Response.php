@@ -7,7 +7,7 @@
  *
  * Class Response
  */
-class Response {
+class Response extends \Base\HttpResponse {
 
     /**
      * 成功响应的编码
@@ -30,7 +30,7 @@ class Response {
      * @param null   $data
      * @param string $message
      *
-     * @return \Base\HttpResponse
+     * @return Response
      *
      * @author  liuchao
      */
@@ -44,7 +44,7 @@ class Response {
      * @param string $message
      * @param null   $data
      *
-     * @return \Base\HttpResponse
+     * @return Response
      *
      * @author  liuchao
      */
@@ -59,7 +59,7 @@ class Response {
      * @param null   $data
      * @param string $message
      *
-     * @return \Base\HttpResponse
+     * @return $this
      *
      * @author  liuchao
      */
@@ -71,7 +71,7 @@ class Response {
             'data'      => $data,
         ];
 
-        return new \Base\HttpResponse($ret);
+        return static::$instance->setContent($ret);
     }
 
     /**
@@ -86,7 +86,7 @@ class Response {
      * @author  liuchao
      */
     public static function raw($data, $code = 200, $headers = []) {
-        return new \Base\HttpResponse($data, $code, $headers);
+        return static::$instance->setContent($data)->setStatusCode($code)->setHeaders($headers);
     }
 
 }

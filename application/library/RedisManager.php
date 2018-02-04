@@ -1,13 +1,13 @@
 <?php
 
 /**
- * 因 Redis 已被PHP扩展定义，故用名 LRdis
+ * Redis 操作类
  *
- * Class LRedis
+ * Class RedisManager
  *
  * @author  liuchao
  */
-class LRedis {
+class RedisManager {
 
     protected static $instance;
 

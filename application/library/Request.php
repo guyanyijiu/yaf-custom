@@ -8,23 +8,7 @@
  * Class Request
  */
 
-class Request {
-
-    /**
-     * HttpRequest
-     *
-     * @var \Base\HttpRequest
-     */
-    private $request;
-
-    /**
-     * Request constructor.
-     *
-     * @param \Base\HttpRequest $request
-     */
-    public function __construct(\Base\HttpRequest $request) {
-        $this->request = $request;
-    }
+class Request extends \Base\HttpRequest {
 
     /**
      * 获取 GET 参数
@@ -37,7 +21,7 @@ class Request {
      * @author  liuchao
      */
     public function get($name = null, $default = null) {
-        return $this->request->getGet($name, $default);
+        return $this->getGet($name, $default);
     }
 
     /**
@@ -51,7 +35,7 @@ class Request {
      * @author  liuchao
      */
     public function post($name = null, $default = null) {
-        return $this->request->getPost($name, $default);
+        return $this->getPost($name, $default);
     }
 
     /**
@@ -62,7 +46,7 @@ class Request {
      * @author  liuchao
      */
     public function raw() {
-        return $this->request->getContent();
+        return $this->getContent();
     }
 
     /**
@@ -76,20 +60,7 @@ class Request {
      * @author  liuchao
      */
     public function header($name = null, $default = null) {
-        return $this->request->getHeader($name, $default);
-    }
-
-    /**
-     * __get
-     *
-     * @param $name
-     *
-     * @return mixed
-     *
-     * @author  liuchao
-     */
-    public function __get($name) {
-        return $this->request->$name;
+        return $this->getHeader($name, $default);
     }
 
 }

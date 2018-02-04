@@ -18,8 +18,8 @@ class AggregateFileHandler extends StreamHandler {
         // 计算运行时间
         $dur = number_format(microtime(true) - YAF_START, 6);
 
-        // 获取YAF请求对象
-        $request = \Yaf_Dispatcher::getInstance()->getRequest();
+        // 获取请求对象
+        $request = container(\Request::class);
 
         // 增加一行自定义日志 唯一请求ID | 请求时间| 运行时间 | 客户端IP | 请求方法 | URI | 请求头
         $log = sprintf(
@@ -28,7 +28,7 @@ class AggregateFileHandler extends StreamHandler {
             $dur,
             $request->getServer('REMOTE_ADDR'),
             $request->getMethod(),
-            $request->getRequestUri(),
+            $request->getUri(),
             $request->getServer('HTTP_USER_AGENT')
         );
 

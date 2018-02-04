@@ -2,7 +2,7 @@
 
 namespace Jobs;
 
-abstract class Base {
+abstract class Beanstalkd {
 
     public $connection;
 
@@ -11,8 +11,6 @@ abstract class Base {
     public $ttl = 7;
 
     public function getLaterTime($ttl = 7) {
-        return ($this->ttl - $ttl) * 60;
-
         return pow(2, $this->ttl - $ttl) * 2 * 60;
     }
 

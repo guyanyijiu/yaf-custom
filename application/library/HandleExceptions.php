@@ -120,7 +120,8 @@ class HandleExceptions {
      *
      * @param Throwable $e
      *
-     * @return \Base\HttpResponse
+     * @return Response
+     * @throws Exception
      *
      * @author  liuchao
      */
@@ -140,6 +141,8 @@ class HandleExceptions {
      * 记录异常日志
      *
      * @param Throwable $e
+     *
+     * @throws Exception
      *
      * @author  liuchao
      */

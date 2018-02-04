@@ -11,7 +11,9 @@ if ( !function_exists('container')) {
      *
      * @param null $name
      *
-     * @return object
+     * @return mixed
+     *
+     * @author  liuchao
      */
     function container($name = null) {
         if ($name) {
@@ -27,12 +29,12 @@ if ( !function_exists('config')) {
     /**
      * 获取 配置项
      *
-     * @Author   liuchao
-     *
      * @param null $key
      * @param null $default
      *
-     * @return null
+     * @return mixed
+     *
+     * @author  liuchao
      */
     function config($key = null, $default = null) {
 

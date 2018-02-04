@@ -8,6 +8,7 @@ define('YAF_START', microtime(true));
 
 // 项目根目录
 define("ROOT_PATH", __DIR__);
+define("APP_PATH", ROOT_PATH . '/application');
 
 // 根据ini配置加载项目配置文件目录
 $conf_path = ini_get('qx_partner.mark');

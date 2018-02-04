@@ -11,7 +11,6 @@
  * Class Bootstrap
  */
 
-
 class Bootstrap extends Yaf_Bootstrap_Abstract {
 
     /**
@@ -27,7 +26,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
     }
 
     /**
-     * 初始化设置
+     * 初始化
      *
      * @Author   liuchao
      *
@@ -40,19 +39,17 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
         // 关闭YAF自动渲染
         $dispatcher->autoRender(false);
 
-        // 注册路由执行插件
-        $dispatcher->registerPlugin(new DispatchPlugin());
-    }
+        // 设置requestId
+        $requestId = $dispatcher->getRequest()->getServer('HTTP_QX_REQUESTID');
+        if ($requestId) {
+            \Uniqid::setRequestId($requestId);
+        }
 
-    /**
-     * 加载容器，注册类库
-     *
-     * @Author   liuchao
-     */
-    public function _initContainer() {
+        // 注册路由执行插件
+        $dispatcher->registerPlugin(new \Base\Intercept());
 
         // 实例化一个容器对象
-        $container = new \Illuminate\Container\Container();
+        $container = new \Base\Container();
 
         // 注册config
         $container->singleton('config', function () {
@@ -77,36 +74,37 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
     }
 
     /**
-     *  生成唯一请求ID
+     * 注册自定义服务
      *
      * @Author   liuchao
-     *
-     * @param \Yaf_Dispatcher $dispatcher
      */
-    public function _initRequestId(Yaf_Dispatcher $dispatcher) {
-        // 先获取传递的requestId
-        $requestId = $dispatcher->getRequest()->getServer('HTTP_QX_REQUESTID');
-        if ($requestId) {
-            \Uniqid::setRequestId($requestId);
-        }
-
-    }
+//    public function _initContainer() {
+//        $container = container();
+//    }
 
     /**
-     * 加载配置文件中自定义路由
+     * 注册中间件
      *
-     * @Author   liuchao
+     * 按照中间件注册的顺序，请求处理前逻辑是倒序执行，请求处理后逻辑是正序执行
      *
-     * @param \Yaf_Dispatcher $dispacher
+     * @author  liuchao
      */
-    //     public function _initRoute(Yaf_Dispatcher $dispacher){
-    //         $routes = config('route');
-    //         if($routes){
-    //             $router = $dispacher->getRouter();
-    //             foreach($routes as $name => $route){
-    //                 $router->addRoute($name, $route);
-    //             }
-    //         }
-    //     }
+//    public function _initMiddleware(){
+//        $container = container();
+
+//        $container->middleware(function(\Request $request, \Response $response, $next){
+//            // 请求处理前逻辑
+//
+//            $response = $next($request, $response);
+//
+//            // 请求处理后逻辑
+//
+//            return $response;
+//        });
+
+//        $container->middleware([
+//            Middleware\Example::class,
+//        ]);
+//    }
 
 }
