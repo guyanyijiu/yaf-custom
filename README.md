@@ -5,9 +5,8 @@ YAF
 
 + 引入 [composer](https://getcomposer.org/) 管理依赖库和自动加载
 + 引入 [illuminate/container](https://github.com/illuminate/container) Ioc 容器，实现控制反转，依赖注入
-+ 引入 [illuminate/database](https://github.com/illuminate/database) 查询构造器，方便数据库操作
 + 修改 配置文件加载机制，实现配置分文件，延迟加载
-+ 修改 Action 加载机制，在 controller 中接管 yaf 对 action 的加载，之后完全由 container 去加载
++ 修改 框架路由加载流程，YAF框架初始化和匹配路由，自定义方式执行路由
 + 修改 框架结构，增加 Services 层，同时使用composer自动加载，可以任意增加自定义模块目录
 
 > require php >= 7.0
@@ -17,13 +16,10 @@ YAF
 ~~~
 yaf
 ├─application           应用目录
-│  ├─controllers        默认的控制器目录
 │  ├─jobs               消息任务相关目录
-│  ├─library        	 默认的扩展类库目录
+│  ├─library        	默认的扩展类库目录
+│  │  ├──Base           基础类目录
 │  │  ├─Model.php       Model 基类文件
-│  │  ├─Controller.php  controller 基类文件
-│  │  ├─Action.php      action 基类文件
-│  │  ├─Service.php     services 基类文件
 │  │  ├─Config.php      配置文件加载类
 │  │  ├─DB.php          DB 快速操作类
 │  │  ├─Http.php        curl 请求类
@@ -37,9 +33,9 @@ yaf
 │  │  └─Api            业务模块目录
 │  │    ├─actions      action 目录
 │  │    └─controllers  controller 目录
-│  ├─plugins           插件目录
 │  ├─services          services 目录
 │  │
+│  ├─Application.php   自定义框架功能
 │  └─Bootstrap.php     启动引导文件
 |
 ├─conf                 配置文件目录
