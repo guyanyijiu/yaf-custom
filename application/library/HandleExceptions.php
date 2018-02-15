@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * 异常处理类
+ *
+ * Class HandleExceptions
+ *
+ * @author  liuchao
+ */
 class HandleExceptions {
 
 
@@ -11,17 +18,18 @@ class HandleExceptions {
      */
     public static function register() {
 
-        error_reporting(-1);
+        if (YAF_ENVIRON == 'product') {
+            error_reporting(0);
+            ini_set('display_errors', 'Off');
+        } else {
+            error_reporting(-1);
+        }
 
         set_error_handler([static::class, 'handleError']);
 
         set_exception_handler([static::class, 'handleException']);
 
         register_shutdown_function([static::class, 'handleShutdown']);
-
-        if (YAF_ENVIRON == 'product') {
-            ini_set('display_errors', 'Off');
-        }
     }
 
     /**
@@ -50,47 +58,17 @@ class HandleExceptions {
      * @author  liuchao
      */
     public static function handleException(\Throwable $e) {
-        if ($e instanceof \Yaf_Exception) {
-            $type = 'YAF 异常';
-        } elseif ($e instanceof \PDOException) {
-            $type = 'POD 异常';
-        } else {
-            $type = '未知 异常';
-        }
+        try {
+            static::record($e);
+        } catch (\Throwable $e) {
 
-        Log::exception($type, [
-            'code'    => $e->getCode(),
-            'message' => $e->getMessage(),
-            'trace'   => $e->getTraceAsString(),
-        ]);
+        }
 
         if (PHP_SAPI == 'cli') {
             static::renderForConsole($e);
         } else {
-            static::renderHttpResponse($e);
+            static::renderForHttp($e);
         }
-    }
-
-    /**
-     *  cli 输出
-     *
-     * @param $e
-     *
-     * @author  liuchao
-     */
-    protected static function renderForConsole($e) {
-        throw $e;
-    }
-
-    /**
-     * http 输出
-     *
-     * @param Exception $e
-     *
-     * @author  liuchao
-     */
-    protected static function renderHttpResponse($e) {
-        Response::fail('程序内部错误');
     }
 
     /**
@@ -107,6 +85,76 @@ class HandleExceptions {
                 )
             );
         }
+    }
+
+    /**
+     * cli 输出
+     *
+     * @param Throwable $e
+     *
+     * @author  liuchao
+     */
+    protected static function renderForConsole(\Throwable $e) {
+        echo $e->getCode(), "\n", $e->getMessage(), "\n", $e->getTraceAsString(), "\n";
+    }
+
+    /**
+     * http 输出
+     *
+     * @param Throwable $e
+     *
+     * @author  liuchao
+     */
+    protected static function renderForHttp(\Throwable $e) {
+        if (YAF_ENVIRON == 'product') {
+            $message = '程序内部错误';
+        } else {
+            $message = $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine();
+        }
+
+        \Response::fail($message)->send();
+    }
+
+    /**
+     * 生成一个异常响应
+     *
+     * @param Throwable $e
+     *
+     * @return Response
+     *
+     * @author  liuchao
+     */
+    public static function makeExceptionResponse(\Throwable $e) {
+        if (YAF_ENVIRON == 'product') {
+            $message = '程序内部错误';
+        } else {
+            $message = $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine();
+        }
+
+        try {
+            static::record($e);
+        } catch (\Throwable $e) {
+
+        }
+
+        return \Response::fail($message);
+    }
+
+    /**
+     * 记录异常日志
+     *
+     * @param Throwable $e
+     *
+     * @throws Exception
+     *
+     * @author  liuchao
+     */
+    public static function record(\Throwable $e) {
+        \Log::exception('未捕获异常', [
+            'code'    => $e->getCode(),
+            'message' => $e->getMessage(),
+            'trace'   => $e->getTraceAsString(),
+        ]);
     }
 
     /**

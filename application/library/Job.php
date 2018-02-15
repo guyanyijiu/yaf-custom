@@ -9,7 +9,7 @@ class Job {
      *
      * @param $jobName
      *
-     * @return \Jobs\Base
+     * @return \Jobs\Beanstalkd
      *
      * @author  liuchao
      */

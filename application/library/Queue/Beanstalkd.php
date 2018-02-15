@@ -8,7 +8,7 @@ use Pheanstalk\Connection;
 use Pheanstalk\Job;
 use Pheanstalk\PheanstalkInterface;
 
-class Beanstalkd {
+class Beanstalkd implements QueueInterface {
 
     /**
      * Pheanstalk 连接实例
@@ -62,7 +62,7 @@ class Beanstalkd {
      *
      * @author  liuchao
      */
-    protected function connect(array $config) {
+    public function connect(array $config) {
         return new Pheanstalk(
             $config['host'],
             $config['port'] ?: PheanstalkInterface::DEFAULT_PORT,

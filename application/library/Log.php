@@ -29,21 +29,24 @@ class Log {
     protected static $special_loggers = [];
 
     /**
-     * 根据模块名生成不同的monolog实例
+     * 根据请求参数生成不同的monolog实例
      *
-     * @Author   liuchao
-     * @return mixed|\Monolog\Logger
+     * @return Logger
+     * @throws Exception
+     *
+     * @author  liuchao
      */
     public static function getLogger() {
 
         if (is_null(static::$logger)) {
-            $moduleName = Yaf_Dispatcher::getInstance()->getRequest()->getModuleName();
-            $controllerName = Yaf_Dispatcher::getInstance()->getRequest()->getControllerName();
+            $request = container(\Request::class);
+            $moduleName = $request->getModule();
+            $controllerName = $request->getController();
 
             $logFile = config('application.log_path') . '/' . config('application.app_name') . '/' . $moduleName . '/' . $controllerName . '/' . date('Y-m-d') . '.log';
             $fileHandler = new AggregateFileHandler($logFile, Logger::DEBUG);
             $fileHandler->setFormatter(
-                new LineFormatter(Uniqid::getRequestId() . "|%datetime%|%channel%|%level_name%|%message%|%context%|%extra%\n", 'Y-m-d H:i:s.u')
+                new LineFormatter(\Uniqid::getRequestId() . "|%datetime%|%channel%|%level_name%|%message%|%context%|%extra%\n", 'Y-m-d H:i:s.u')
             );
             $bufferHandler = new BufferHandler($fileHandler, 100, Logger::DEBUG, false, true);
 
@@ -57,9 +60,10 @@ class Log {
     }
 
     /**
-     * 命令行下的 monolog 实例
+     * 生成命令行下的 monolog 实例
      *
      * @return Logger
+     * @throws Exception
      *
      * @author  liuchao
      */
@@ -89,17 +93,20 @@ class Log {
      * @param bool $is_buffer
      *
      * @return mixed
+     * @throws Exception
      *
      * @author  liuchao
      */
     public static function getSpecialLogger($type, $is_buffer = false) {
         if ( !isset(static::$special_loggers[$type])) {
             if (PHP_SAPI == 'cli') {
+                $is_buffer = false;
                 $moduleName = 'cli';
                 $controllerName = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1, -4);
             } else {
-                $moduleName = Yaf_Dispatcher::getInstance()->getRequest()->getModuleName();
-                $controllerName = Yaf_Dispatcher::getInstance()->getRequest()->getControllerName();
+                $request = container(\Request::class);
+                $moduleName = $request->getModule();
+                $controllerName = $request->getController();
             }
 
             $logFile = config('application.log_path') . '/' . config('application.app_name') . '/' . $moduleName . '/' . $controllerName . '/' . $type . '.' . date('Y-m-d') . '.log';
@@ -107,7 +114,7 @@ class Log {
             if ($is_buffer) {
                 $fileHandler = new \Log\AggregateHandler($logFile, Logger::DEBUG);
                 $fileHandler->setFormatter(
-                    new LineFormatter(Uniqid::getRequestId() . "|%datetime%|%channel%|$type|%message%|%context%\n", 'Y-m-d H:i:s.u')
+                    new LineFormatter(\Uniqid::getRequestId() . "|%datetime%|%channel%|$type|%message%|%context%\n", 'Y-m-d H:i:s.u')
                 );
                 $handler = new BufferHandler($fileHandler, 100, Logger::DEBUG, false, true);
             } else {
@@ -133,6 +140,8 @@ class Log {
      * @param       $message
      * @param array $context
      *
+     * @throws Exception
+     *
      * @author  liuchao
      */
     public static function exception($message, array $context = []) {
@@ -149,6 +158,8 @@ class Log {
      *
      * @param $logs
      *
+     * @throws Exception
+     *
      * @author  liuchao
      */
     public static function sql($logs) {
@@ -158,46 +169,42 @@ class Log {
         $logger = static::getSpecialLogger('sql', true);
 
         foreach ($logs as $v) {
-            $sql = '';
-            $sql .= $v['query'] . '|';
-            if ($v['bindings']) {
-                $sql .= implode(',', $v['bindings']);
-            }
-            $sql .= '|' . $v['time'];
-            $logger->info($sql);
+            $logger->info($v['time'] . '|' . $v['query'], $v['bindings']);
         }
     }
 
     /**
      * 代理普通方法调用
      *
-     * @Author   liuchao
-     *
      * @param $method
      * @param $parameters
      *
      * @return mixed
+     * @throws Exception
+     *
+     * @author  liuchao
      */
     public function __call($method, $parameters) {
         $logger = PHP_SAPI == 'cli' ? static::getCliLogger() : static::getLogger();
 
-        return call_user_func_array([$logger, $method], $parameters);
+        return $logger->{$method}(...$parameters);
     }
 
     /**
      * 代理静态方法调用
      *
-     * @Author   liuchao
-     *
      * @param $method
      * @param $parameters
      *
      * @return mixed
+     * @throws Exception
+     *
+     * @author  liuchao
      */
     public static function __callStatic($method, $parameters) {
         $logger = PHP_SAPI == 'cli' ? static::getCliLogger() : static::getLogger();
 
-        return call_user_func_array([$logger, $method], $parameters);
+        return $logger->{$method}(...$parameters);
     }
 
 }

@@ -1,6 +1,10 @@
 <?php
 
+use Base\ErrorMessageTrait;
+
 class Model {
+
+    use ErrorMessageTrait;
 
     /**
      * 连接名
@@ -17,19 +21,13 @@ class Model {
     protected $table;
 
     /**
-     * db 实例
+     * 非查询构造器方法
      *
-     * @var \Illuminate\Database\Capsule\Manager
+     * @var array
      */
-    protected static $resolver;
-
-
-    /**
-     * 错误信息
-     *
-     * @var string
-     */
-    protected $error;
+    protected $support = [
+        'raw', 'transaction', 'beginTransaction', 'rollBack', 'commit',
+    ];
 
     /**
      * Model constructor.
@@ -39,53 +37,33 @@ class Model {
      */
     public function __construct($table = null, $connection = null) {
 
-        if(!is_null($table)){
+        if ( !is_null($table)) {
             $this->table = $table;
         }
-        if(!is_null($connection)){
+        if ( !is_null($connection)) {
             $this->connection = $connection;
         }
 
-        if(is_null($this->table)){
+        if (is_null($this->table)) {
             $this->table = snake_case(class_basename(static::class));
         }
     }
 
     /**
-     * 获取一个查询构造器
+     * 获取连接
      *
-     * @return \Illuminate\Database\Capsule\Manager
+     * @param null $name
+     *
+     * @return \Illuminate\Database\Connection
      *
      * @author  liuchao
      */
-    public function newQuery() {
-        if (is_null(self::$resolver)) {
-            self::$resolver = Yaf_Registry::get('container')['db'];
+    public function connection($name = null) {
+        if (is_null($name)) {
+            $name = $this->connection;
         }
 
-        return (self::$resolver)::table($this->table, $this->connection);
-    }
-
-    /**
-     * 设置错误信息
-     *
-     * @param $error
-     *
-     * @author  liuchao
-     */
-    public function setError($error) {
-        $this->error = $error;
-    }
-
-    /**
-     * 获取错误信息
-     *
-     * @return string
-     *
-     * @author  liuchao
-     */
-    public function getError() {
-        return $this->error;
+        return \DB::connection($name);
     }
 
     /**
@@ -100,7 +78,11 @@ class Model {
      */
     public function __call($method, $parameters) {
         try {
-            return $this->newQuery()->$method(...$parameters);
+            if (in_array($method, $this->support)) {
+                return $this->connection($this->connection)->$method(...$parameters);
+            }
+
+            return $this->connection($this->connection)->table($this->table)->$method(...$parameters);
         } catch (\BadMethodCallException $e) {
             throw new BadMethodCallException(
                 sprintf('Call to undefined method %s::%s()', get_class($this), $method)
