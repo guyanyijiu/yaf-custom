@@ -51,6 +51,8 @@ class Bootstrap extends Yaf_Bootstrap_Abstract {
         // 实例化一个容器对象
         $container = new \Base\Container();
 
+        Yaf_Registry::set('container', $container);
+        
         // 注册config
         $container->singleton('config', function () {
             return new \Config(CONF_PATH);

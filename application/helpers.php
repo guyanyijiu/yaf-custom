@@ -17,10 +17,10 @@ if ( !function_exists('container')) {
      */
     function container($name = null) {
         if ($name) {
-            return \Base\Container::getInstance()->make($name);
+            return Yaf_Registry::get('container')->make($name);
         }
 
-        return \Base\Container::getInstance();
+        return Yaf_Registry::get('container');
     }
 }
 
