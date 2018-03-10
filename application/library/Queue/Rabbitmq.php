@@ -287,7 +287,7 @@ class Rabbitmq implements QueueInterface {
         $routeKey = $this->config['route_key'];
 
         return $this->run(function () use ($exchange, $message, $routeKey) {
-            return $exchange->publish($message, $routeKey);
+            return $exchange->publish($message, $routeKey, AMQP_NOPARAM, ['delivery_mode' => 2]);
         });
 
     }
