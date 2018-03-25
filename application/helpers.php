@@ -64,4 +64,40 @@ if ( !function_exists('event')) {
     }
 }
 
+if ( !function_exists('view')) {
+
+    /**
+     * 简易的视图实现
+     *
+     * @param null  $view
+     * @param array $data
+     *
+     * @return string
+     * @throws Throwable
+     *
+     * @author  liuchao
+     */
+    function view($view = null, $data = []) {
+
+        $path = config('view.paths') . '/' . str_replace('.', '/', $view) . '.html';
+
+        $obLevel = ob_get_level();
+
+        ob_start();
+
+        extract($data, EXTR_SKIP);
+
+        try {
+            include $path;
+        } catch (Throwable $e) {
+            while (ob_get_level() > $obLevel) {
+                ob_end_clean();
+            }
+
+            throw $e;
+        }
+
+        return ltrim(ob_get_clean());
+    }
+}
 
