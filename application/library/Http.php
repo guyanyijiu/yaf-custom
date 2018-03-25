@@ -18,11 +18,11 @@ use GuzzleHttp\Exception\RequestException;
 class Http {
 
     /**
-     * 缓存一个 guzzle 实例
+     * 缓存 guzzle 实例
      *
      * @var
      */
-    protected static $client;
+    protected static $client = [];
 
     /**
      * 请求的body类型
@@ -47,14 +47,13 @@ class Http {
      * @author  liuchao
      */
     public static function guzzle($args = []) {
-
-        if ( !is_null(static::$client)) {
-            return static::$client;
+        $key = md5(serialize($args));
+        if ( !isset(static::$client[$key])) {
+            $args['headers']['QX-REQUESTID'] = \Uniqid::getRequestId();
+            static::$client[$key] = new Client($args);
         }
-        $args['headers']['QX-REQUESTID'] = \Uniqid::getRequestId();
 
-        return static::$client = new Client($args);
-
+        return static::$client[$key];
     }
 
     /**

@@ -4,7 +4,7 @@ namespace Services\Api;
 
 use Models\User;
 
-class LoginCheck extends \Service {
+class LoginCheck extends \Base\Service {
 
     private $user;
 

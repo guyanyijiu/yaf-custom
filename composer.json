@@ -6,7 +6,8 @@
         "illuminate/events": "^5.5",
         "monolog/monolog": "^1.23",
         "pda/pheanstalk": "^3.1",
-        "illuminate/redis": "^5.5"
+        "illuminate/redis": "^5.5",
+        "illuminate/translation": "^5.5"
     },
     "autoload": {
         "psr-4": {

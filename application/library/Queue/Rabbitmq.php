@@ -43,6 +43,13 @@ class Rabbitmq implements QueueInterface {
      */
     protected $queue;
 
+    /**
+     * 已建立的连接
+     *
+     * @var array
+     */
+    public static $AMQPConnection = [];
+
 
     /**
      * Rabbitmq constructor.
@@ -65,18 +72,25 @@ class Rabbitmq implements QueueInterface {
      * @author  liuchao
      */
     public function connect(array $config) {
-        $connection = new AMQPConnection([
+        $params = [
             'host'     => $config['host'],
             'port'     => $config['port'],
             'login'    => $config['login'],
             'password' => $config['password'],
             'vhost'    => $config['vhost'],
-        ]);
+        ];
+        $key = md5(json_encode($params));
 
         try {
-            $connection->pconnect();
 
-            $this->connection = $connection;
+            // 复用已有连接
+            if (empty(static::$AMQPConnection[$key])) {
+                $connection = new AMQPConnection($params);
+                $connection->pconnect();
+                static::$AMQPConnection[$key] = $connection;
+            }
+
+            $this->connection = static::$AMQPConnection[$key];
 
             // 创建 channel
             $this->onChannel();
@@ -273,7 +287,7 @@ class Rabbitmq implements QueueInterface {
         $routeKey = $this->config['route_key'];
 
         return $this->run(function () use ($exchange, $message, $routeKey) {
-            return $exchange->publish($message, $routeKey);
+            return $exchange->publish($message, $routeKey, AMQP_NOPARAM, ['delivery_mode' => 2]);
         });
 
     }

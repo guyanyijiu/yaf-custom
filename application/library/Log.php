@@ -29,6 +29,13 @@ class Log {
     protected static $special_loggers = [];
 
     /**
+     * 当前日期
+     *
+     * @var string
+     */
+    protected static $date;
+
+    /**
      * 根据请求参数生成不同的monolog实例
      *
      * @return Logger
@@ -36,7 +43,7 @@ class Log {
      *
      * @author  liuchao
      */
-    public static function getLogger() {
+    protected static function getLogger() {
 
         if (is_null(static::$logger)) {
             $request = container(\Request::class);
@@ -67,7 +74,12 @@ class Log {
      *
      * @author  liuchao
      */
-    public static function getCliLogger() {
+    protected static function getCliLogger() {
+        if (is_null(static::$date) || static::$date != date('Y-m-d')) {
+            static::$date = date('Y-m-d');
+            static::$logger = null;
+        }
+
         if (is_null(static::$logger)) {
             $script = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1, -4);
             $logFile = config('application.log_path') . '/' . config('application.app_name') . '/cli/' . $script . '/' . date('Y-m-d') . '.log';
@@ -80,7 +92,6 @@ class Log {
             $logger->pushHandler($fileHandler);
 
             static::$logger = $logger;
-
         }
 
         return static::$logger;
@@ -97,7 +108,12 @@ class Log {
      *
      * @author  liuchao
      */
-    public static function getSpecialLogger($type, $is_buffer = false) {
+    protected static function getSpecialLogger($type, $is_buffer = false) {
+        if (is_null(static::$date) || static::$date != date('Y-m-d')) {
+            static::$date = date('Y-m-d');
+            static::$special_loggers = [];
+        }
+
         if ( !isset(static::$special_loggers[$type])) {
             if (PHP_SAPI == 'cli') {
                 $is_buffer = false;
@@ -171,6 +187,30 @@ class Log {
         foreach ($logs as $v) {
             $logger->info($v['time'] . '|' . $v['query'], $v['bindings']);
         }
+    }
+
+    public static function debug($message, array $context = []) {
+        $logger = PHP_SAPI == 'cli' ? static::getCliLogger() : static::getLogger();
+
+        return $logger->debug($message, $context);
+    }
+
+    public static function info($message, array $context = []) {
+        $logger = PHP_SAPI == 'cli' ? static::getCliLogger() : static::getLogger();
+
+        return $logger->info($message, $context);
+    }
+
+    public static function warn($message, array $context = []) {
+        $logger = PHP_SAPI == 'cli' ? static::getCliLogger() : static::getLogger();
+
+        return $logger->warn($message, $context);
+    }
+
+    public static function error($message, array $context = []) {
+        $logger = PHP_SAPI == 'cli' ? static::getCliLogger() : static::getLogger();
+
+        return $logger->error($message, $context);
     }
 
     /**

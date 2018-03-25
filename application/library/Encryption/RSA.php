@@ -25,45 +25,123 @@ class RSA {
     ];
 
     /**
-     * 加密
+     * 公钥加密
      *
      * @param     $data
      * @param     $publicKey
+     * @param int $keyLen
      * @param int $padding
      *
      * @return bool|string
      *
      * @author  liuchao
      */
-    public static function encrypt($data, $publicKey, $padding = OPENSSL_PKCS1_PADDING) {
+    public static function publicEncrypt($data, $publicKey, $keyLen = 1024, $padding = OPENSSL_PKCS1_PADDING) {
         $key = openssl_get_publickey($publicKey);
         if ($key === false) {
             return false;
         }
-        $crypted = '';
-        openssl_public_encrypt($data, $crypted, $key, $padding);
 
-        return $crypted;
+        $encrypted = '';
+        $part_len = $keyLen / 8 - 11;
+        $parts = str_split($data, $part_len);
+        foreach ($parts as $part) {
+            $encrypted_temp = '';
+            openssl_public_encrypt($part, $encrypted_temp, $key, $padding);
+            $encrypted .= $encrypted_temp;
+        }
+
+        return $encrypted;
     }
 
     /**
-     * 解密
+     * 私钥加密
      *
      * @param     $data
      * @param     $privateKey
+     * @param int $keyLen
      * @param int $padding
      *
      * @return bool|string
      *
      * @author  liuchao
      */
-    public static function decrypt($data, $privateKey, $padding = OPENSSL_PKCS1_PADDING) {
-        $key = openssl_get_publickey($privateKey);
+    public static function privateEncrypt($data, $privateKey, $keyLen = 1024, $padding = OPENSSL_PKCS1_PADDING) {
+        $key = openssl_get_privatekey($privateKey);
         if ($key === false) {
             return false;
         }
-        $decrypted = '';
-        openssl_private_decrypt($data, $decrypted, $key, $padding);
+
+        $encrypted = '';
+        $part_len = $keyLen / 8 - 11;
+        $parts = str_split($data, $part_len);
+        foreach ($parts as $part) {
+            $encrypted_temp = '';
+            openssl_private_encrypt($part, $encrypted_temp, $key, $padding);
+            $encrypted .= $encrypted_temp;
+        }
+
+        return $encrypted;
+    }
+
+    /**
+     * 公钥解密
+     *
+     * @param     $data
+     * @param     $publicKey
+     * @param int $keyLen
+     * @param int $padding
+     *
+     * @return bool|string
+     *
+     * @author  liuchao
+     */
+    public static function publicDecrypt($data, $publicKey, $keyLen = 1024, $padding = OPENSSL_PKCS1_PADDING) {
+        $key = openssl_get_publickey($publicKey);
+        if ($key === false) {
+            return false;
+        }
+
+        $decrypted = "";
+        $part_len = $keyLen / 8;
+        $parts = str_split($data, $part_len);
+
+        foreach ($parts as $part) {
+            $decrypted_temp = '';
+            openssl_public_decrypt($part, $decrypted_temp, $key, $padding);
+            $decrypted .= $decrypted_temp;
+        }
+
+        return $decrypted;
+    }
+
+    /**
+     * 私钥解密
+     *
+     * @param     $data
+     * @param     $privateKey
+     * @param int $keyLen
+     * @param int $padding
+     *
+     * @return bool|string
+     *
+     * @author  liuchao
+     */
+    public static function privateDecrypt($data, $privateKey, $keyLen = 1024, $padding = OPENSSL_PKCS1_PADDING) {
+        $key = openssl_get_privatekey($privateKey);
+        if ($key === false) {
+            return false;
+        }
+
+        $decrypted = "";
+        $part_len = $keyLen / 8;
+        $parts = str_split($data, $part_len);
+
+        foreach ($parts as $part) {
+            $decrypted_temp = '';
+            openssl_private_decrypt($part, $decrypted_temp, $key, $padding);
+            $decrypted .= $decrypted_temp;
+        }
 
         return $decrypted;
     }
@@ -119,5 +197,5 @@ class RSA {
 
         return $res === 1 ? true : false;
     }
-    
+
 }

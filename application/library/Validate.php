@@ -1101,6 +1101,8 @@ class Validate
             $msg = $this->message[$attribute][$type];
         } elseif (isset($this->message[$attribute])) {
             $msg = $this->message[$attribute];
+        } elseif (isset($this->message[$type])){
+            $msg = $this->message[$type];
         } elseif (isset(self::$typeMsg[$type])) {
             $msg = self::$typeMsg[$type];
         } else {

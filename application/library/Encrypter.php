@@ -226,36 +226,73 @@ class Encrypter {
     }
 
     /**
-     * RSA 加密
+     * RSA 公钥加密
      *
      * @param     $publicKey
+     * @param int $keyLen
      * @param int $padding
      *
      * @return $this
      *
      * @author  liuchao
      */
-    public function rsaEncrypt($publicKey, $padding = OPENSSL_PKCS1_PADDING) {
-        $this->data = \Encryption\RSA::encrypt($this->data, $publicKey, $padding);
+    public function rsaPublicEncrypt($publicKey, $keyLen = 1024, $padding = OPENSSL_PKCS1_PADDING) {
+        $this->data = \Encryption\RSA::publicEncrypt($this->data, $publicKey, $keyLen, $padding);
 
         return $this;
     }
 
     /**
-     * RSA 解密
+     * RSA 私钥加密
      *
      * @param     $privateKey
+     * @param int $kenLen
      * @param int $padding
      *
      * @return $this
      *
      * @author  liuchao
      */
-    public function rsaDecrypt($privateKey, $padding = OPENSSL_PKCS1_PADDING) {
-        $this->data = \Encryption\RSA::decrypt($this->data, $privateKey, $padding);
+    public function rsaPrivateEncrypt($privateKey, $kenLen = 1024, $padding = OPENSSL_PKCS1_PADDING) {
+        $this->data = \Encryption\RSA::privateEncrypt($this->data, $privateKey, $kenLen, $padding);
 
         return $this;
     }
+
+    /**
+     * RSA 公钥解密
+     *
+     * @param     $publicKey
+     * @param int $kenLen
+     * @param int $padding
+     *
+     * @return $this
+     *
+     * @author  liuchao
+     */
+    public function rsaPublicDecrypt($publicKey, $kenLen = 1024, $padding = OPENSSL_PKCS1_PADDING) {
+        $this->data = \Encryption\RSA::publicDecrypt($this->data, $publicKey, $kenLen, $padding);
+
+        return $this;
+    }
+
+    /**
+     * RSA 私钥解密
+     *
+     * @param     $privateKey
+     * @param int $kenLen
+     * @param int $padding
+     *
+     * @return $this
+     *
+     * @author  liuchao
+     */
+    public function rsaPrivateDecrypt($privateKey, $kenLen = 1024, $padding = OPENSSL_PKCS1_PADDING) {
+        $this->data = \Encryption\RSA::privateDecrypt($this->data, $privateKey, $kenLen, $padding);
+
+        return $this;
+    }
+
 
     /**
      * RSA 签名

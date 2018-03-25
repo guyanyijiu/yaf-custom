@@ -31,6 +31,28 @@
 //    return new \Illuminate\Events\Dispatcher($container);
 //});
 
+// 多语言支持
+//$container->singleton('files', function () {
+//    return new \Illuminate\Filesystem\Filesystem;
+//});
+//
+//$container->instance('path.lang', ROOT_PATH . '/resources/lang');
+//
+//$container->singleton('translation.loader', function ($container) {
+//    return new \Illuminate\Translation\FileLoader($container['files'], $container['path.lang']);
+//});
+//
+//$container->singleton('translator', function ($container) {
+//    $loader = $container['translation.loader'];
+//
+//    $locale = $container['config']['app.locale'];
+//
+//    $trans = new \Illuminate\Translation\Translator($loader, $locale);
+//
+//    $trans->setFallback($container['config']['app.fallback_locale']);
+//
+//    return $trans;
+//});
 
 /**
  * 注册中间件
