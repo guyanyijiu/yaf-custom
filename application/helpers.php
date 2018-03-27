@@ -101,3 +101,44 @@ if ( !function_exists('view')) {
     }
 }
 
+if ( !function_exists('trans')) {
+    /**
+     * 多语言支持
+     *
+     * @param null  $id
+     * @param array $replace
+     * @param null  $locale
+     *
+     * @return \Base\Container|mixed
+     *
+     * @author  liuchao
+     */
+    function trans($id = null, $replace = [], $locale = null) {
+        if (is_null($id)) {
+            return container('translator');
+        }
+
+        return container('translator')->trans($id, $replace, $locale);
+    }
+}
+
+if ( !function_exists('validate_trans')) {
+    /**
+     * 多语言版本校验类
+     *
+     * @param array $rules
+     *
+     * @return Validate
+     *
+     * @author  liuchao
+     */
+    function validate_trans(array $rules) {
+        $messages = container('translator')->trans('validation');
+        $attributes = container('translator')->trans('validation.attributes');
+        if ( !is_array($attributes)) {
+            $attributes = [];
+        }
+
+        return new \Validate($rules, $messages, $attributes);
+    }
+}
