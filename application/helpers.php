@@ -142,4 +142,3 @@ if ( !function_exists('validate_trans')) {
         return new \Validate($rules, $messages, $attributes);
     }
 }
-
